@@ -96,24 +96,26 @@
   }
 
   .nav-links {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
     position: fixed;
     top: 100%; left: 0; right: 0;
     background: #111;
     gap: 2rem;
     border-top: 1px solid #333;
     padding: 2rem 1rem;
-    max-height: calc(100vh - 100%);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
   }
 
-  .nav-links.open { 
-    display: flex;
-    animation: slideDown 0.3s ease-out;
+  .nav-links.open {
+    max-height: 90vh;
+    opacity: 1;
+    overflow-y: auto;
   }
 
   .nav-links li {

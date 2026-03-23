@@ -11,9 +11,13 @@
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 1.5rem);
   text-align: center;
   transition: border-color 0.2s, box-shadow 0.2s;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .card:hover {
@@ -24,14 +28,20 @@
 .card h3 {
   color: #111;
   margin-bottom: 0.5rem;
+  font-size: clamp(1.1rem, 3vw, 1.3rem);
 }
 
-.card p { color: #666; font-size: 0.9rem; }
+.card p { 
+  color: #666; 
+  font-size: clamp(0.85rem, 2vw, 0.9rem);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
 
 .price {
   display: inline-block;
-  margin-top: 1rem;
-  font-size: 1.3rem;
+  margin-top: auto;
+  font-size: clamp(1.1rem, 3vw, 1.3rem);
   font-weight: 700;
   color: #111;
 }
