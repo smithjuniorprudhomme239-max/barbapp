@@ -1,0 +1,32 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #fff;
+  color: #111;
+  scroll-behavior: smooth;
+}
+
+.section {
+  padding: 5rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  color: #111;
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+h2::after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 3px;
+  background: #111;
+  margin: 0.5rem auto 0;
+  border-radius: 2px;
+}

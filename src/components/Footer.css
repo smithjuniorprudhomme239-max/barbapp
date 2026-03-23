@@ -1,0 +1,22 @@
+.footer {
+  background: #111;
+  text-align: center;
+  padding: 1.5rem;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.socials {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.socials a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.socials a:hover { text-decoration: underline; }

@@ -1,0 +1,59 @@
+.contact { background: #fff; }
+
+.contact-inner {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  align-items: flex-start;
+}
+
+.contact-info { flex: 1; min-width: 220px; }
+
+.contact-info p {
+  color: #555;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.booking-form {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.booking-form input,
+.booking-form select {
+  padding: 0.7rem 1rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #111;
+  font-size: 0.95rem;
+}
+
+.booking-form input:focus,
+.booking-form select:focus {
+  outline: none;
+  border-color: #111;
+}
+
+.booking-form button {
+  padding: 0.75rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.booking-form button:hover { background: #333; }
+
+.thanks { flex: 1; text-align: center; padding: 2rem; }
+.thanks h3 { color: #111; font-size: 1.5rem; }
+.thanks p { color: #555; margin-top: 0.5rem; }

@@ -1,0 +1,37 @@
+.services { background: #f5f5f5; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(1rem, 3vw, 1.5rem);
+  margin-top: clamp(1.5rem, 4vw, 2rem);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: #111;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+  color: #111;
+  margin-bottom: 0.5rem;
+}
+
+.card p { color: #666; font-size: 0.9rem; }
+
+.price {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111;
+}
