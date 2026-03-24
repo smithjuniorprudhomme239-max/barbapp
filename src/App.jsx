@@ -17,9 +17,9 @@ function AppContent() {
   const [page, setPage] = useState('home')
   const { adminToken } = useAuth()
 
-  if (page === 'adminLogin') return <Login onSuccess={() => setPage('admin')} />
+  if (page === 'adminLogin') return <Login onSuccess={() => setPage('admin')} onClose={() => setPage('home')} />
   if (page === 'admin' && adminToken) return <Admin onLogout={() => setPage('home')} />
-  if (page === 'admin' && !adminToken) return <Login onSuccess={() => setPage('admin')} />
+  if (page === 'admin' && !adminToken) return <Login onSuccess={() => setPage('admin')} onClose={() => setPage('home')} />
   if (page === 'userAuth') return <UserAuth onSuccess={() => setPage('home')} onClose={() => setPage('home')} />
   if (page === 'market') return <MarketPage onBack={() => setPage('home')} />
 

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
-export default function Login({ onSuccess }) {
+export default function Login({ onSuccess, onClose }) {
   const { adminLogin } = useAuth()
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
@@ -19,6 +19,7 @@ export default function Login({ onSuccess }) {
   return (
     <div className="login-page">
       <form className="login-form" onSubmit={submit}>
+        <button type="button" className="close-btn" onClick={onClose}>✕</button>
         <h2>Admin Login</h2>
         <input name="username" placeholder="Username" value={form.username} onChange={handle} required />
         <input name="password" type="password" placeholder="Password" value={form.password} onChange={handle} required />
