@@ -1,0 +1,16 @@
+.market {
+  background: #f5f5f5;
+}
+
+.market-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.market-content p {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+}

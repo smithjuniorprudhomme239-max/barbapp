@@ -10,6 +10,7 @@ import Footer from './components/Footer'
 import Login from './components/Login'
 import Admin from './components/Admin'
 import UserAuth from './components/UserAuth'
+import MarketPage from './components/MarketPage'
 import './App.css'
 
 function AppContent() {
@@ -20,10 +21,11 @@ function AppContent() {
   if (page === 'admin' && adminToken) return <Admin onLogout={() => setPage('home')} />
   if (page === 'admin' && !adminToken) return <Login onSuccess={() => setPage('admin')} />
   if (page === 'userAuth') return <UserAuth onSuccess={() => setPage('home')} onClose={() => setPage('home')} />
+  if (page === 'market') return <MarketPage onBack={() => setPage('home')} />
 
   return (
     <>
-      <Navbar onAdminClick={() => setPage('adminLogin')} onUserAuthClick={() => setPage('userAuth')} />
+      <Navbar onAdminClick={() => setPage('adminLogin')} onUserAuthClick={() => setPage('userAuth')} onMarketClick={() => setPage('market')} />
       <Hero />
       <Services />
       <Gallery />
