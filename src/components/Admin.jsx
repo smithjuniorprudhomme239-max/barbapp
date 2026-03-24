@@ -26,7 +26,7 @@ export default function Admin({ onLogout }) {
     <div className="admin-layout">
       {/* Sidebar */}
       <aside className="admin-sidebar">
-        <div className="sidebar-brand">✂ FadeKing</div>
+        <div className="sidebar-brand">✂ DuckensBarber</div>
         <nav className="sidebar-nav">
           <span className="sidebar-link active">📋 Bookings</span>
         </nav>

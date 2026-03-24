@@ -12,7 +12,7 @@ app.use('/api/auth', require('./routes/auth'))
 app.use('/api/bookings', require('./routes/bookings'))
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }))
-app.get('/', (_, res) => res.send('FadeKing API is running. Frontend is at http://localhost:5173'))
+app.get('/', (_, res) => res.send('DuckensBarber API is running. Frontend is at http://localhost:5173'))
 
 const PORT = process.env.PORT || 5000
 

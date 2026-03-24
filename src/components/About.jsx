@@ -8,7 +8,7 @@ export default function About() {
         <div className="about-text">
           <h2>About Us</h2>
           <p>
-            FadeKing has been serving the community for over 10 years. We believe every client
+            DuckensBarber has been serving the community for over 10 years. We believe every client
             deserves a premium experience — from the moment you walk in to the moment you leave
             looking your best.
           </p>

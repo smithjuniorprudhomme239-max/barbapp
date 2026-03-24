@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './Gallery.css'
 
 const photos = [
@@ -10,14 +11,42 @@ const photos = [
 ]
 
 export default function Gallery() {
+  const [selectedImage, setSelectedImage] = useState(null)
+
+  const openLightbox = (src) => {
+    setSelectedImage(src)
+    document.body.style.overflow = 'hidden'
+  }
+
+  const closeLightbox = () => {
+    setSelectedImage(null)
+    document.body.style.overflow = 'auto'
+  }
+
   return (
     <section id="gallery" className="section gallery">
       <h2>Gallery</h2>
       <div className="grid">
         {photos.map((src, i) => (
-          <img key={i} src={src} alt={`cut-${i}`} loading="lazy" />
+          <img 
+            key={i} 
+            src={src} 
+            alt={`cut-${i}`} 
+            loading="lazy"
+            onClick={() => openLightbox(src)}
+            className="gallery-image"
+          />
         ))}
       </div>
+
+      {selectedImage && (
+        <div className="lightbox" onClick={closeLightbox}>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <button className="lightbox-close" onClick={closeLightbox}>×</button>
+            <img src={selectedImage} alt="Enlarged view" />
+          </div>
+        </div>
+      )}
     </section>
   )
 }
