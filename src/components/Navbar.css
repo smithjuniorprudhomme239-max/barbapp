@@ -114,7 +114,10 @@
   }
 
   .nav-links.open {
-    max-height: 100vh;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    max-height: 100dvh;
     opacity: 1;
     overflow-y: auto;
   }
