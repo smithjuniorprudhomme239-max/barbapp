@@ -9,9 +9,9 @@ export default function Login({ onSuccess, onClose }) {
 
   const handle = e => setForm({ ...form, [e.target.name]: e.target.value })
 
-  const submit = e => {
+  const submit = async e => {
     e.preventDefault()
-    const ok = adminLogin(form.username, form.password)
+    const ok = await adminLogin(form.username, form.password)
     if (ok) onSuccess()
     else setError('Invalid username or password.')
   }

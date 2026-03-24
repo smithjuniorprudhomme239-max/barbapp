@@ -36,9 +36,14 @@ const products = [
 export default function MarketPage({ onBack }) {
   const [cart, setCart] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const [showCart, setShowCart] = useState(false)
 
   const addToCart = (product) => {
     setCart([...cart, product])
+  }
+
+  const toggleCart = () => {
+    setShowCart(!showCart)
   }
 
   const openLightbox = (product) => {
@@ -57,7 +62,11 @@ export default function MarketPage({ onBack }) {
       <header className="market-header">
         <button className="back-button" onClick={onBack}>← Back</button>
         <h1>Market</h1>
-        <div className="cart-icon">
+        <div 
+          className="cart-icon"
+          onClick={toggleCart}
+          style={{ cursor: 'pointer' }}
+        >
           🛒 {cart.length}
         </div>
       </header>
@@ -92,18 +101,24 @@ export default function MarketPage({ onBack }) {
       </section>
 
       {/* Cart Section */}
-      {cart.length > 0 && (
+      {showCart && (
         <section className="cart-section">
           <h2>Your Cart ({cart.length})</h2>
           <div className="cart-items">
-            {cart.map((item, index) => (
-              <div key={index} className="cart-item">
-                <span>{item.name}</span>
-                <span>{item.price}</span>
-              </div>
-            ))}
+            {cart.length > 0 ? (
+              cart.map((item, index) => (
+                <div key={index} className="cart-item">
+                  <span>{item.name}</span>
+                  <span>{item.price}</span>
+                </div>
+              ))
+            ) : (
+              <p className="empty-cart">Your cart is empty</p>
+            )}
           </div>
-          <button className="checkout-btn">Checkout</button>
+          {cart.length > 0 && (
+            <button className="checkout-btn">Checkout</button>
+          )}
         </section>
       )}
 
