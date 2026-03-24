@@ -144,6 +144,7 @@
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
 .product-card:hover {
@@ -271,5 +272,236 @@
   
   .cart-section {
     padding: 1.5rem;
+  }
+}
+
+/* Lightbox styles */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 85vh;
+  animation: scaleIn 0.3s ease;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.lightbox-close:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.lightbox-product-card {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: row;
+  max-height: 85vh;
+  overflow: hidden;
+}
+
+.lightbox-product-card .product-image {
+  width: 50%;
+  height: auto;
+  max-height: 85vh;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.lightbox-product-card .product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px 0 0 8px;
+}
+
+.lightbox-product-card .product-info {
+  width: 50%;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.lightbox-product-card .product-info h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #111;
+}
+
+.lightbox-product-card .product-price {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #f5c518;
+  font-weight: 700;
+}
+
+.lightbox-product-card .product-description {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  color: #666;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.lightbox-product-card .add-to-cart-btn {
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+  background: #f5c518;
+  color: #111;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 1rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .lightbox-content {
+    max-width: 95%;
+    max-height: 90vh;
+  }
+  
+  .lightbox-close {
+    top: 10px;
+    right: 10px;
+    font-size: 1.3rem;
+    width: 28px;
+    height: 28px;
+  }
+  
+  .lightbox-product-card {
+    max-width: 100%;
+    max-height: 90vh;
+    flex-direction: column;
+  }
+  
+  .lightbox-product-card .product-image {
+    width: 100%;
+    height: 40vh;
+    max-height: 300px;
+  }
+  
+  .lightbox-product-card .product-image img {
+    border-radius: 8px 8px 0 0;
+  }
+  
+  .lightbox-product-card .product-info {
+    width: 100%;
+    padding: 1.5rem;
+    max-height: 50vh;
+  }
+  
+  .lightbox-product-card .product-info h3 {
+    font-size: 1.3rem;
+  }
+  
+  .lightbox-product-card .product-price {
+    font-size: 1.2rem;
+  }
+  
+  .lightbox-product-card .add-to-cart-btn {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .lightbox-content {
+    max-width: 98%;
+    max-height: 95vh;
+  }
+  
+  .lightbox-close {
+    top: 8px;
+    right: 8px;
+    font-size: 1.2rem;
+    width: 25px;
+    height: 25px;
+  }
+  
+  .lightbox-product-card {
+    max-height: 95vh;
+  }
+  
+  .lightbox-product-card .product-image {
+    height: 35vh;
+    max-height: 250px;
+  }
+  
+  .lightbox-product-card .product-info {
+    padding: 1.25rem;
+    max-height: 60vh;
+  }
+  
+  .lightbox-product-card .product-info h3 {
+    font-size: 1.2rem;
+  }
+  
+  .lightbox-product-card .product-price {
+    font-size: 1.1rem;
+  }
+  
+  .lightbox-product-card .add-to-cart-btn {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
   }
 }

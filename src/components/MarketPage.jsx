@@ -35,9 +35,20 @@ const products = [
 
 export default function MarketPage({ onBack }) {
   const [cart, setCart] = useState([])
+  const [selectedProduct, setSelectedProduct] = useState(null)
 
   const addToCart = (product) => {
     setCart([...cart, product])
+  }
+
+  const openLightbox = (product) => {
+    setSelectedProduct(product)
+    document.body.style.overflow = 'hidden'
+  }
+
+  const closeLightbox = () => {
+    setSelectedProduct(null)
+    document.body.style.overflow = 'auto'
   }
 
   return (
@@ -54,7 +65,11 @@ export default function MarketPage({ onBack }) {
       {/* Products Grid */}
       <section className="products-grid">
         {products.map(product => (
-          <div key={product.id} className="product-card">
+          <div 
+            key={product.id} 
+            className="product-card"
+            onClick={() => openLightbox(product)}
+          >
             <div className="product-image">
               <img src={product.image} alt={product.name} />
             </div>
@@ -64,7 +79,10 @@ export default function MarketPage({ onBack }) {
               <p className="product-description">{product.description}</p>
               <button 
                 className="add-to-cart-btn"
-                onClick={() => addToCart(product)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  addToCart(product)
+                }}
               >
                 Add to Cart
               </button>
@@ -87,6 +105,34 @@ export default function MarketPage({ onBack }) {
           </div>
           <button className="checkout-btn">Checkout</button>
         </section>
+      )}
+
+      {/* Lightbox */}
+      {selectedProduct && (
+        <div className="lightbox" onClick={closeLightbox}>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <button className="lightbox-close" onClick={closeLightbox}>×</button>
+            <div className="product-card lightbox-product-card">
+              <div className="product-image">
+                <img src={selectedProduct.image} alt={selectedProduct.name} />
+              </div>
+              <div className="product-info">
+                <h3>{selectedProduct.name}</h3>
+                <p className="product-price">{selectedProduct.price}</p>
+                <p className="product-description">{selectedProduct.description}</p>
+                <button 
+                  className="add-to-cart-btn"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    addToCart(selectedProduct)
+                  }}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
