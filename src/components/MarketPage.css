@@ -69,12 +69,46 @@
 
 @media (max-width: 480px) {
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1rem;
   }
   
   .product-image {
-    height: 150px;
+    height: 200px;
+  }
+  
+  .product-info {
+    padding: 1.25rem;
+  }
+  
+  .product-info h3 {
+    font-size: 1.1rem;
+  }
+  
+  .product-price {
+    font-size: 1.1rem;
+  }
+  
+  .product-description {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .add-to-cart-btn {
+    padding: 0.6rem 1.2rem;
+    min-height: 40px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 360px) {
+  .products-grid {
+    gap: 1.25rem;
+  }
+  
+  .product-image {
+    height: 180px;
   }
   
   .product-info {
