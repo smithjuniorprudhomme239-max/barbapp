@@ -134,9 +134,9 @@ export default function Contact() {
                     <li key={index} className="appointment-item">
                       <span className="appointment-time">{new Date(appointment.date).toLocaleString()}</span>
                       <span className="appointment-service">{appointment.service}</span>
-                      <span className="appointment-status">
+                      <button className={`appointment-status-btn ${appointment.status ? 'status-completed' : 'status-pending'}`}>
                         {appointment.status ? 'Completed' : 'Pending'}
-                      </span>
+                      </button>
                     </li>
                   ))}
                 </ul>
