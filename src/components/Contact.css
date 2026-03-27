@@ -142,6 +142,14 @@
   text-align: center;
 }
 
+.appointment-status {
+  color: #cc0000;
+  font-size: 0.9rem;
+  font-weight: 600;
+  width: 80px;
+  text-align: right;
+}
+
 .status-completed {
   background: #4caf50;
 }
@@ -164,7 +172,7 @@
     padding: 0.5rem;
   }
   
-  .appointment-time, .appointment-service, .appointment-name {
+  .appointment-time, .appointment-service, .appointment-name, .appointment-status {
     width: 100%;
     text-align: left;
   }

@@ -132,7 +132,7 @@ export default function Contact() {
                 <ul className="appointments-list">
                   {userAppointments.map((appointment, index) => (
                     <li key={index} className="appointment-item">
-                      <span className="appointment-time">{new Date(appointment.date).toLocaleString()}</span>
+                      <span className="appointment-time">{new Date(appointment.date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</span>
                       <span className="appointment-service">{appointment.service}</span>
                       <button className={`appointment-status-btn ${appointment.status ? 'status-completed' : 'status-pending'}`}>
                         {appointment.status ? 'Completed' : 'Pending'}
@@ -156,9 +156,8 @@ export default function Contact() {
                 <ul className="appointments-list">
                   {bookedAppointments.map((appointment, index) => (
                     <li key={index} className="appointment-item">
-                      <span className="appointment-time">{new Date(appointment.date).toLocaleTimeString()}</span>
-                      <span className="appointment-service">{appointment.service}</span>
-                      <span className="appointment-name">{appointment.name}</span>
+                      <span className="appointment-time">{new Date(appointment.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
+                      <span className="appointment-status">Booked</span>
                     </li>
                   ))}
                 </ul>
