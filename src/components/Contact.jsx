@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth, supabase } from '../context/AuthContext'
 import './Contact.css'
 
 export default function Contact() {
@@ -16,15 +16,20 @@ export default function Contact() {
 
     if (!user) return setError('Please login or sign up to book an appointment.')
 
-    const token = localStorage.getItem('token')
-    const res = await fetch('http://100.111.241.53:5000/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify(form)
-    })
+    const { data, error: supabaseError } = await supabase
+      .from('bookings')
+      .insert({
+        ...form,
+        user_id: user.id
+      })
+      .select()
+      .single()
 
-    if (res.ok) setSent(true)
-    else { const d = await res.json(); setError(d.error || 'Booking failed.') }
+    if (supabaseError) {
+      setError(supabaseError.message || 'Booking failed.')
+    } else {
+      setSent(true)
+    }
   }
 
   return (

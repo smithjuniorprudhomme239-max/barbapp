@@ -173,6 +173,63 @@ tr:hover td { background: #fafafa; }
   white-space: nowrap;
 }
 
+/* Booking status styles */
+tr.completed-booking {
+  background-color: #e8f5e8;
+}
+
+tr.pending-booking {
+  background-color: #fef5e8;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-completed {
+  background-color: #4caf50;
+  color: white;
+}
+
+.status-pending {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Status toggle buttons */
+.status-toggle {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-completed {
+  background-color: #f44336;
+  color: white;
+}
+
+.toggle-completed:hover {
+  background-color: #d32f2f;
+}
+
+.toggle-pending {
+  background-color: #4caf50;
+  color: white;
+}
+
+.toggle-pending:hover {
+  background-color: #388e3c;
+}
+
 .no-bookings {
   color: #aaa;
   text-align: center;

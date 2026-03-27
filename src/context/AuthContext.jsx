@@ -1,73 +1,97 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
 const AuthContext = createContext()
-const API = 'http://100.111.241.53:5000/api'
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const t = localStorage.getItem('token')
-    const u = localStorage.getItem('user')
-    return t && u ? JSON.parse(u) : null
-  })
-  const [adminToken, setAdminToken] = useState(() => localStorage.getItem('adminToken') || null)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const getSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          setUser(session.user)
+        }
+      } catch (error) {
+        console.error('Error getting session:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    getSession()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const signup = async (name, email, password) => {
-    const res = await fetch(`${API}/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name }
+      }
     })
-    const data = await res.json()
-    if (!res.ok) return { ok: false, msg: data.error }
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(data.user))
-    setUser(data.user)
+    if (error) return { ok: false, msg: error.message }
     return { ok: true }
   }
 
   const login = async (email, password) => {
-    const res = await fetch(`${API}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
     })
-    const data = await res.json()
-    if (!res.ok) return { ok: false, msg: data.error }
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(data.user))
-    setUser(data.user)
+    if (error) return { ok: false, msg: error.message }
     return { ok: true }
   }
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setUser(null)
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) return { ok: false, msg: error.message }
+    return { ok: true }
   }
 
-  const adminLogin = async (username, password) => {
-    const res = await fetch(`${API}/auth/admin`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+  const adminLogin = async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
     })
-    const data = await res.json()
-    if (!res.ok) return false
-    localStorage.setItem('adminToken', data.token)
-    setAdminToken(data.token)
+    if (error) return false
+    
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+    
+    if (userError || userData.role !== 'admin') {
+      await logout()
+      return false
+    }
+    
     return true
   }
 
-  const adminLogout = () => {
-    localStorage.removeItem('adminToken')
-    setAdminToken(null)
+  const adminLogout = async () => {
+    return await logout()
   }
 
   return (
-    <AuthContext.Provider value={{ user, adminToken, login, signup, logout, adminLogin, adminLogout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, adminLogin, adminLogout }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
 export const useAuth = () => useContext(AuthContext)
+export { supabase }

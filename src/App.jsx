@@ -15,11 +15,15 @@ import './App.css'
 
 function AppContent() {
   const [page, setPage] = useState('home')
-  const { adminToken } = useAuth()
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return <div className="loading">Loading...</div>
+  }
 
   if (page === 'adminLogin') return <Login onSuccess={() => setPage('admin')} onClose={() => setPage('home')} />
-  if (page === 'admin' && adminToken) return <Admin onLogout={() => setPage('home')} />
-  if (page === 'admin' && !adminToken) return <Login onSuccess={() => setPage('admin')} onClose={() => setPage('home')} />
+  if (page === 'admin' && user) return <Admin onLogout={() => setPage('home')} />
+  if (page === 'admin' && !user) return <Login onSuccess={() => setPage('admin')} onClose={() => setPage('home')} />
   if (page === 'userAuth') return <UserAuth onSuccess={() => setPage('home')} onClose={() => setPage('home')} />
   if (page === 'market') return <MarketPage onBack={() => setPage('home')} />
 

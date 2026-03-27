@@ -14,11 +14,11 @@ export default function UserAuth({ onSuccess, onClose }) {
     e.preventDefault()
     setError('')
     if (mode === 'login') {
-      const res = login(form.email, form.password)
+      const res = await login(form.email, form.password)
       if (res.ok) onSuccess()
       else setError(res.msg)
     } else {
-      const res = signup(form.name, form.email, form.password)
+      const res = await signup(form.name, form.email, form.password)
       if (res.ok) onSuccess()
       else setError(res.msg)
     }

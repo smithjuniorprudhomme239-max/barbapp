@@ -1,42 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../context/AuthContext'
 import './MarketPage.css'
 
-// Sample products data
-const products = [
-  {
-    id: 1,
-    name: 'Barber Apron',
-    price: '$25.00',
-    description: 'Professional barber apron with multiple pockets',
-    image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&h=300&fit=crop'
-  },
-  {
-    id: 2,
-    name: 'Hair Clippers',
-    price: '$120.00',
-    description: 'Professional grade hair clippers',
-    image: 'https://images.unsplash.com/photo-1591370874394-168492a94f59?w=300&h=300&fit=crop'
-  },
-  {
-    id: 3,
-    name: 'Beard Oil',
-    price: '$15.00',
-    description: 'Premium beard oil for a healthy beard',
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=300&fit=crop'
-  },
-  {
-    id: 4,
-    name: 'Pomade',
-    price: '$18.00',
-    description: 'Strong hold pomade for styling',
-    image: 'https://images.unsplash.com/photo-1581044777550-6928f5b7be1a?w=300&h=300&fit=crop'
-  }
-]
-
 export default function MarketPage({ onBack }) {
+  const [products, setProducts] = useState([])
   const [cart, setCart] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [showCart, setShowCart] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        console.log('Fetching products from Supabase...')
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+        
+        if (error) {
+          console.error('Error fetching products:', error)
+          setLoading(false)
+        } else {
+          console.log('Products fetched successfully:', data)
+          setProducts(Array.isArray(data) ? data : [])
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('Unexpected error fetching products:', error)
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   const addToCart = (product) => {
     setCart([...cart, product])
@@ -73,31 +69,37 @@ export default function MarketPage({ onBack }) {
 
       {/* Products Grid */}
       <section className="products-grid">
-        {products.map(product => (
-          <div 
-            key={product.id} 
-            className="product-card"
-            onClick={() => openLightbox(product)}
-          >
-            <div className="product-image">
-              <img src={product.image} alt={product.name} />
+        {loading ? (
+          <p className="loading-products">Loading products...</p>
+        ) : products.length === 0 ? (
+          <p className="no-products">No products available.</p>
+        ) : (
+          products.map(product => (
+            <div 
+              key={product.id} 
+              className="product-card"
+              onClick={() => openLightbox(product)}
+            >
+              <div className="product-image">
+                <img src={product.image} alt={product.name} />
+              </div>
+              <div className="product-info">
+                <h3>{product.name}</h3>
+                <p className="product-price">{product.price}</p>
+                <p className="product-description">{product.description}</p>
+                <button 
+                  className="add-to-cart-btn"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    addToCart(product)
+                  }}
+                >
+                  Add to Cart
+                </button>
+              </div>
             </div>
-            <div className="product-info">
-              <h3>{product.name}</h3>
-              <p className="product-price">{product.price}</p>
-              <p className="product-description">{product.description}</p>
-              <button 
-                className="add-to-cart-btn"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  addToCart(product)
-                }}
-              >
-                Add to Cart
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </section>
 
       {/* Cart Section */}

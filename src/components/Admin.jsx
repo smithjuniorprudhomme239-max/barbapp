@@ -1,23 +1,53 @@
 import { useEffect, useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth, supabase } from '../context/AuthContext'
 import './Admin.css'
 
 export default function Admin({ onLogout }) {
-  const { adminLogout } = useAuth()
+  const { adminLogout, user } = useAuth()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const fetchBookings = async () => {
+    console.log('Fetching bookings...')
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .order('date', { ascending: true })
+    
+    if (error) {
+      console.error('Error fetching bookings:', error)
+      setLoading(false)
+    } else {
+      console.log('Bookings fetched:', data)
+      setBookings(Array.isArray(data) ? data : [])
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const token = localStorage.getItem('adminToken')
-    fetch('http://100.111.241.53:5000/api/bookings', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(data => { setBookings(Array.isArray(data) ? data : []); setLoading(false) })
-      .catch(() => setLoading(false))
+    fetchBookings()
   }, [])
 
-  const handleLogout = () => { adminLogout(); onLogout() }
+  const toggleBookingStatus = async (bookingId, currentStatus) => {
+    console.log('Toggling booking status:', bookingId, 'Current status:', currentStatus, 'New status:', !currentStatus)
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: !currentStatus })
+      .eq('id', bookingId)
+    
+    if (error) {
+      console.error('Error updating booking status:', error)
+    } else {
+      console.log('Booking status updated successfully')
+      // Refresh bookings after update
+      fetchBookings()
+    }
+  }
+
+  const handleLogout = async () => { 
+    await adminLogout()
+    onLogout() 
+  }
 
   const today = bookings.filter(b => new Date(b.date).toDateString() === new Date().toDateString()).length
   const services = [...new Set(bookings.map(b => b.service))].length
@@ -83,17 +113,32 @@ export default function Admin({ onLogout }) {
                     <th>Email</th>
                     <th>Service</th>
                     <th>Date & Time</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {bookings.map((b, i) => (
-                    <tr key={b.id}>
+                    <tr key={b.id} className={b.status ? 'completed-booking' : 'pending-booking'}>
                       <td>{i + 1}</td>
                       <td>{b.name}</td>
                       <td>{b.phone}</td>
                       <td>{b.email || '—'}</td>
                       <td><span className="service-tag">{b.service}</span></td>
                       <td>{new Date(b.date).toLocaleString()}</td>
+                      <td>
+                        <span className={`status-badge ${b.status ? 'status-completed' : 'status-pending'}`}>
+                          {b.status ? 'Completed' : 'Pending'}
+                        </span>
+                      </td>
+                      <td>
+                        <button 
+                          className={`status-toggle ${b.status ? 'toggle-completed' : 'toggle-pending'}`}
+                          onClick={() => toggleBookingStatus(b.id, b.status)}
+                        >
+                          {b.status ? 'Mark as Pending' : 'Mark as Completed'}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
