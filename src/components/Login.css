@@ -113,3 +113,88 @@
 }
 
 .close-btn:hover { color: #f5c518; }
+
+/* Password input container */
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Password toggle button */
+.login-form .password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.login-form .password-toggle:hover {
+  color: #111;
+}
+
+/* Ensure password input fills the container */
+.password-input-container input {
+  width: 100%;
+  padding-right: 40px; /* Space for the toggle button */
+}
+
+/* Forgot password link */
+.forgot-password {
+  text-align: center;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.forgot-password span {
+  color: #111;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.forgot-password span:hover {
+  color: #f5c518;
+}
+
+/* Back to login link */
+.back-to-login {
+  text-align: center;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.back-to-login span {
+  color: #111;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.back-to-login span:hover {
+  color: #f5c518;
+}
+
+/* Forgot password info */
+.forgot-password-info {
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Success message */
+.login-success {
+  color: #4caf50;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}

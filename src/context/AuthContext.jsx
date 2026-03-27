@@ -86,8 +86,16 @@ export function AuthProvider({ children }) {
     return await logout()
   }
 
+  const forgotPassword = async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin
+    })
+    if (error) return { ok: false, msg: error.message }
+    return { ok: true }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, adminLogin, adminLogout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, adminLogin, adminLogout, forgotPassword }}>
       {children}
     </AuthContext.Provider>
   )
