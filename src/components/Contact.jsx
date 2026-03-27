@@ -80,6 +80,29 @@ export default function Contact() {
     }
   }
 
+  const deleteAppointment = async (appointmentId) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', appointmentId)
+        .eq('user_id', user.id)
+
+      if (error) {
+        console.error('Error deleting appointment:', error)
+        setError('Failed to delete appointment.')
+      } else {
+        // Refresh appointments after deletion
+        fetchUserAppointments()
+      }
+    } catch (error) {
+      console.error('Error deleting appointment:', error)
+      setError('Failed to delete appointment.')
+    }
+  }
+
   // Fetch user appointments when component mounts or user changes
   useEffect(() => {
     if (user) {
@@ -136,6 +159,12 @@ export default function Contact() {
                       <span className="appointment-service">{appointment.service}</span>
                       <button className={`appointment-status-btn ${appointment.status ? 'status-completed' : 'status-pending'}`}>
                         {appointment.status ? 'Completed' : 'Pending'}
+                      </button>
+                      <button 
+                        className="delete-appointment-btn"
+                        onClick={() => deleteAppointment(appointment.id)}
+                      >
+                        Delete
                       </button>
                     </li>
                   ))}

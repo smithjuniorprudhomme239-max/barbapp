@@ -39,6 +39,12 @@
   font-size: 0.95rem;
 }
 
+.booking-form input[type="datetime-local"] {
+  background: #f5f5f5;
+  border: 2px solid #f5c518;
+  box-shadow: 0 0 0 2px rgba(245, 197, 24, 0.1);
+}
+
 .booking-form input:focus,
 .booking-form select:focus {
   outline: none;
@@ -150,6 +156,24 @@
   text-align: right;
 }
 
+.delete-appointment-btn {
+  background: #cc0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 80px;
+  text-align: center;
+}
+
+.delete-appointment-btn:hover {
+  background: #990000;
+}
+
 .status-completed {
   background: #4caf50;
 }
@@ -177,7 +201,8 @@
     text-align: left;
   }
   
-  .appointment-status-btn {
+  .appointment-status-btn,
+  .delete-appointment-btn {
     width: 100px;
     text-align: center;
     margin-top: 0.5rem;
