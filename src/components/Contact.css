@@ -8,6 +8,11 @@
   align-items: flex-start;
 }
 
+.appointments-section {
+  flex: 1;
+  min-width: 260px;
+}
+
 .contact-info { flex: 1; min-width: 220px; }
 
 .contact-info p {
@@ -57,3 +62,97 @@
 .thanks { flex: 1; text-align: center; padding: 2rem; }
 .thanks h3 { color: #111; font-size: 1.5rem; }
 .thanks p { color: #555; margin-top: 0.5rem; }
+
+/* User Appointments Section */
+.user-appointments {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.user-appointments h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #111;
+}
+
+/* Booked Appointments Section */
+.booked-appointments {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.booked-appointments h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #111;
+}
+
+.appointments-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.appointment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.appointment-item:last-child {
+  border-bottom: none;
+}
+
+.appointment-time {
+  font-weight: 600;
+  color: #111;
+  width: 150px;
+}
+
+.appointment-service {
+  flex: 1;
+  text-align: center;
+  color: #666;
+}
+
+.appointment-name {
+  color: #888;
+  font-size: 0.9rem;
+  width: 120px;
+  text-align: right;
+}
+
+.appointment-status {
+  color: #888;
+  font-size: 0.9rem;
+  width: 100px;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .user-appointments,
+  .booked-appointments {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .appointment-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+  
+  .appointment-time, .appointment-service, .appointment-name, .appointment-status {
+    width: 100%;
+    text-align: left;
+  }
+}
