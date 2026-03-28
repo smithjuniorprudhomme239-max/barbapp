@@ -60,7 +60,7 @@ export default function Admin({ onLogout }) {
         <nav className="sidebar-nav">
           <span className="sidebar-link active">📋 Bookings</span>
         </nav>
-        <button className="sidebar-logout" onClick={handleLogout}>⬅ Logout</button>
+        <button className="sidebar-logout" onClick={handleLogout} style={{ color: '#cc0000' }}>⬅ Logout</button>
       </aside>
 
       {/* Main */}

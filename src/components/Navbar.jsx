@@ -20,7 +20,7 @@ export default function Navbar({ onAdminClick, onUserAuthClick, onMarketClick })
         <li><button className="btn-book" onClick={() => { setOpen(false); onMarketClick(); }}>Market</button></li>
         <li>
           {user
-            ? <button className="btn-admin" onClick={logout}>👤 {user.name} · Logout</button>
+            ? <button className="btn-admin" onClick={logout} style={{ color: '#cc0000' }}>⬅ Logout</button>
             : <button className="btn-admin" onClick={onUserAuthClick}>Login / Sign Up</button>
           }
         </li>
