@@ -92,7 +92,6 @@ export default function Admin({ onLogout }) {
     const q = search.toLowerCase()
     return bookings.filter(b =>
       b.name?.toLowerCase().includes(q) ||
-      b.phone?.toLowerCase().includes(q) ||
       b.service?.toLowerCase().includes(q)
     )
   }, [bookings, search])
@@ -176,7 +175,6 @@ export default function Admin({ onLogout }) {
                   <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Phone</th>
                     <th>Service</th>
                     <th>Date</th>
                     <th>Time</th>
@@ -189,7 +187,6 @@ export default function Admin({ onLogout }) {
                     <tr key={b.id} className={b.status === 'completed' ? 'row-completed' : ''}>
                       <td>{i + 1}</td>
                       <td className="td-name">{b.name}</td>
-                      <td>{b.phone || '—'}</td>
                       <td><span className="service-tag">{b.service}</span></td>
                       <td>{formatDate(b.date)}</td>
                       <td>{formatTime(b.date)}</td>

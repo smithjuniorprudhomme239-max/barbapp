@@ -66,7 +66,7 @@ function isSunday(dateStr) {
 
 export default function Contact() {
   const [step, setStep] = useState(1)
-  const [form, setForm] = useState({ name: '', phone: '', date: getBostonToday(), time: '', service: '' })
+  const [form, setForm] = useState({ name: '', date: getBostonToday(), time: '', service: '' })
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -114,7 +114,6 @@ export default function Contact() {
         .from('bookings')
         .insert([{
           name: form.name,
-          phone: form.phone,
           service: form.service,
           date: dateTime
         }])
@@ -144,8 +143,9 @@ export default function Contact() {
 
   const resetForm = () => {
     setSent(false)
-    setForm({ name: '', phone: '', date: getBostonToday(), time: '', service: '' })
+    setForm({ name: '', date: getBostonToday(), time: '', service: '' })
     setStep(1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const bostonToday = getBostonToday()
@@ -163,7 +163,7 @@ export default function Contact() {
           </p>
           <p className="success-note">We'll send you a confirmation shortly.</p>
           <button className="okay-button" onClick={resetForm}>
-            Book Another
+            ← Back to Home
           </button>
         </div>
       </section>
@@ -242,14 +242,6 @@ export default function Contact() {
                 placeholder="Your Full Name"
                 value={form.name}
                 onChange={e => update('name', e.target.value)}
-                required
-              />
-              <input
-                name="phone"
-                type="tel"
-                placeholder="Phone Number"
-                value={form.phone}
-                onChange={e => update('phone', e.target.value)}
                 required
               />
               {error && <p className="form-error">{error}</p>}
