@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import API from '../api'
+import { supabase } from '../lib/supabaseClient'
 
 const AuthContext = createContext()
 
@@ -8,90 +8,69 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token')
-    const storedUser = localStorage.getItem('user')
-    if (storedToken && storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-    setLoading(false)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const signup = async (name, email, password) => {
-    try {
-      const res = await fetch(`${API}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
-      })
-      const data = await res.json()
-      if (!res.ok) return { ok: false, msg: data.error }
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      setUser(data.user)
-      return { ok: true }
-    } catch (err) {
-      return { ok: false, msg: 'Network error' }
-    }
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } }
+    })
+    if (error) return { ok: false, msg: error.message }
+    return { ok: true, user: data.user }
   }
 
   const login = async (email, password) => {
-    try {
-      const res = await fetch(`${API}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      const data = await res.json()
-      if (!res.ok) return { ok: false, msg: data.error }
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      setUser(data.user)
-      return { ok: true }
-    } catch (err) {
-      return { ok: false, msg: 'Network error' }
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return { ok: false, msg: error.message }
+    return { ok: true, user: data.user }
   }
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setUser(null)
+  const logout = async () => {
+    await supabase.auth.signOut()
     return { ok: true }
   }
 
-  const adminLogin = async (username, password) => {
-    try {
-      const res = await fetch(`${API}/auth/admin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      })
-      const data = await res.json()
-      if (!res.ok) return false
-      localStorage.setItem('adminToken', data.token)
-      setUser({ role: 'admin' })
-      return true
-    } catch (err) {
+  const adminLogin = async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return false
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
+      await supabase.auth.signOut()
       return false
     }
+
+    return true
   }
 
-  const adminLogout = () => {
-    localStorage.removeItem('adminToken')
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setUser(null)
+  const adminLogout = async () => {
+    await supabase.auth.signOut()
   }
 
   const forgotPassword = async (email) => {
-    return { ok: false, msg: 'Forgot password not implemented' }
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
+    if (error) return { ok: false, msg: error.message }
+    return { ok: true, msg: 'Check your email for reset link' }
   }
 
-  const getToken = () => localStorage.getItem('token')
-  const getAdminToken = () => localStorage.getItem('adminToken')
-
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, adminLogin, adminLogout, forgotPassword, getToken, getAdminToken }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, adminLogin, adminLogout, forgotPassword }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../lib/supabaseClient'
 import API from '../api'
 import './Admin.css'
 
 export default function Admin({ onLogout }) {
-  const { adminLogout, user, getAdminToken } = useAuth()
+  const { adminLogout, user } = useAuth()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -12,7 +13,8 @@ export default function Admin({ onLogout }) {
     console.log('Fetching bookings...')
     setLoading(true)
     try {
-      const token = getAdminToken()
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
       const res = await fetch(`${API}/bookings`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
