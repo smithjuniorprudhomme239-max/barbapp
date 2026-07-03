@@ -1,15 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import './Admin.css'
 
+const PRICES = {
+  'Classic Haircut': 25,
+  'Fade & Taper': 30,
+  'Beard Trim': 15,
+  'Hot Towel Shave': 45,
+  'Hair + Beard Combo': 40,
+  'Kids Cut': 25
+}
+
 export default function Admin({ onLogout }) {
-  const { adminLogout, user } = useAuth()
+  const { adminLogout } = useAuth()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [deleteId, setDeleteId] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   const fetchBookings = async () => {
-    console.log('Fetching bookings...')
     setLoading(true)
     try {
       const { data, error } = await supabase
@@ -17,7 +28,6 @@ export default function Admin({ onLogout }) {
         .select('*')
         .order('date', { ascending: true })
       if (error) throw error
-      console.log('Bookings fetched:', data)
       setBookings(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error fetching bookings:', error)
@@ -30,33 +40,87 @@ export default function Admin({ onLogout }) {
     fetchBookings()
   }, [])
 
-  const handleLogout = async () => { 
+  const handleLogout = async () => {
     await adminLogout()
-    onLogout() 
+    onLogout()
   }
 
+  const toggleStatus = async (booking) => {
+    const newStatus = booking.status === 'completed' ? 'pending' : 'completed'
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: newStatus })
+      .eq('id', booking.id)
+    if (error) {
+      console.error('Error updating status:', error)
+      return
+    }
+    setBookings(prev =>
+      prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b)
+    )
+  }
+
+  const handleDelete = async () => {
+    if (!deleteId) return
+    setDeleting(true)
+    const { error } = await supabase
+      .from('bookings')
+      .delete()
+      .eq('id', deleteId)
+    if (error) {
+      console.error('Error deleting:', error)
+      setDeleting(false)
+      setDeleteId(null)
+      return
+    }
+    setBookings(prev => prev.filter(b => b.id !== deleteId))
+    setDeleting(false)
+    setDeleteId(null)
+  }
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return bookings
+    const q = search.toLowerCase()
+    return bookings.filter(b =>
+      b.name?.toLowerCase().includes(q) ||
+      b.phone?.toLowerCase().includes(q) ||
+      b.service?.toLowerCase().includes(q)
+    )
+  }, [bookings, search])
+
   const today = bookings.filter(b => new Date(b.date).toDateString() === new Date().toDateString()).length
-  const services = [...new Set(bookings.map(b => b.service))].length
+  const completedCount = bookings.filter(b => b.status === 'completed').length
+  const pendingCount = bookings.filter(b => b.status === 'pending' || !b.status).length
+  const totalRevenue = bookings
+    .filter(b => b.status === 'completed')
+    .reduce((sum, b) => sum + (PRICES[b.service] || 0), 0)
+
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  const formatTime = (dateStr) => {
+    const d = new Date(dateStr)
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  }
 
   return (
     <div className="admin-layout">
-      {/* Sidebar */}
       <aside className="admin-sidebar">
-        <div className="sidebar-brand">✂ DuckensBarber</div>
+        <div className="sidebar-brand">✂ Duckens</div>
         <nav className="sidebar-nav">
           <span className="sidebar-link active">📋 Bookings</span>
         </nav>
-        <button className="sidebar-logout" onClick={handleLogout} style={{ color: '#cc0000' }}>⬅ Logout</button>
+        <button className="sidebar-logout" onClick={handleLogout}>⬅ Logout</button>
       </aside>
 
-      {/* Main */}
       <main className="admin-main">
         <div className="admin-topbar">
           <h1>Dashboard</h1>
           <span className="admin-badge">👤 admin</span>
         </div>
 
-        {/* Stat Cards */}
         <div className="admin-stats">
           <div className="stat-card">
             <span className="stat-icon">📅</span>
@@ -69,25 +133,48 @@ export default function Admin({ onLogout }) {
             <span className="stat-icon">🕐</span>
             <div>
               <p className="stat-value">{today}</p>
-              <p className="stat-label">Today's Bookings</p>
+              <p className="stat-label">Today</p>
             </div>
           </div>
           <div className="stat-card">
-            <span className="stat-icon">✂</span>
+            <span className="stat-icon">✅</span>
             <div>
-              <p className="stat-value">{services}</p>
-              <p className="stat-label">Services Booked</p>
+              <p className="stat-value">{completedCount}</p>
+              <p className="stat-label">Completed</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">⏳</span>
+            <div>
+              <p className="stat-value">{pendingCount}</p>
+              <p className="stat-label">Pending</p>
+            </div>
+          </div>
+          <div className="stat-card highlight">
+            <span className="stat-icon">💰</span>
+            <div>
+              <p className="stat-value">${totalRevenue}</p>
+              <p className="stat-label">Revenue</p>
             </div>
           </div>
         </div>
 
-        {/* Table */}
         <div className="admin-table-wrap">
-          <h2>All Bookings</h2>
+          <div className="table-header">
+            <h2>All Bookings</h2>
+            <input
+              className="search-input"
+              type="text"
+              placeholder="🔍 Search bookings..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+
           {loading ? (
             <p className="no-bookings">Loading...</p>
-          ) : bookings.length === 0 ? (
-            <p className="no-bookings">No bookings yet.</p>
+          ) : filtered.length === 0 ? (
+            <p className="no-bookings">{search ? 'No matching bookings.' : 'No bookings yet.'}</p>
           ) : (
             <div className="table-scroll">
               <table>
@@ -96,20 +183,39 @@ export default function Admin({ onLogout }) {
                     <th>#</th>
                     <th>Name</th>
                     <th>Phone</th>
-                    <th>Email</th>
                     <th>Service</th>
-                    <th>Date & Time</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map((b, i) => (
-                    <tr key={b.id}>
+                  {filtered.map((b, i) => (
+                    <tr key={b.id} className={b.status === 'completed' ? 'row-completed' : ''}>
                       <td>{i + 1}</td>
-                      <td>{b.name}</td>
-                      <td>{b.phone}</td>
-                      <td>{b.email || '—'}</td>
+                      <td className="td-name">{b.name}</td>
+                      <td>{b.phone || '—'}</td>
                       <td><span className="service-tag">{b.service}</span></td>
-                      <td>{new Date(b.date).toLocaleString()}</td>
+                      <td>{formatDate(b.date)}</td>
+                      <td>{formatTime(b.date)}</td>
+                      <td>
+                        <button
+                          className={`status-btn ${b.status === 'completed' ? 'status-done' : 'status-pend'}`}
+                          onClick={() => toggleStatus(b)}
+                        >
+                          {b.status === 'completed' ? 'Done' : 'Pending'}
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="delete-btn"
+                          onClick={() => setDeleteId(b.id)}
+                          title="Delete booking"
+                        >
+                          🗑
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -118,6 +224,21 @@ export default function Admin({ onLogout }) {
           )}
         </div>
       </main>
+
+      {deleteId && (
+        <div className="modal-overlay" onClick={() => setDeleteId(null)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <h3>Delete Booking?</h3>
+            <p>This action cannot be undone.</p>
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setDeleteId(null)}>Cancel</button>
+              <button className="btn-delete" onClick={handleDelete} disabled={deleting}>
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

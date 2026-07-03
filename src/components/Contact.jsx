@@ -76,6 +76,19 @@ export default function Contact() {
     const dateTime = `${form.date}T${convertTime(form.time)}`
 
     try {
+      // Check if slot is already taken
+      const { data: existing } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('date', dateTime)
+        .limit(1)
+
+      if (existing && existing.length > 0) {
+        setError('This time slot is already taken. Please pick another time.')
+        setSubmitting(false)
+        return
+      }
+
       const { error: supabaseError } = await supabase
         .from('bookings')
         .insert([{

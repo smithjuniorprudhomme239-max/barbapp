@@ -2,7 +2,7 @@
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background: #f4f4f4;
+  background: #f5f5f5;
 }
 
 /* Sidebar */
@@ -14,6 +14,7 @@
   padding: 2rem 1.25rem;
   position: fixed;
   top: 0; left: 0; bottom: 0;
+  z-index: 100;
 }
 
 .sidebar-brand {
@@ -88,8 +89,8 @@
 /* Stat Cards */
 .admin-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 
@@ -100,8 +101,22 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.stat-card.highlight {
+  background: linear-gradient(135deg, #2e7d32, #43a047);
+  color: #fff;
+}
+
+.stat-card.highlight .stat-value,
+.stat-card.highlight .stat-label { color: #fff; }
 
 .stat-icon { font-size: 2rem; }
 
@@ -113,27 +128,51 @@
 }
 
 .stat-label {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #888;
   margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
+
+/* Table Header */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.table-header h2 {
+  text-align: left;
+  font-size: 1.1rem;
+  color: #111;
+  margin: 0;
+}
+
+.table-header h2::after { display: none; }
+
+.search-input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  width: 240px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus { border-color: #2e7d32; }
 
 /* Table */
 .admin-table-wrap {
   background: #fff;
   border-radius: 10px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
-
-.admin-table-wrap h2 {
-  text-align: left;
-  font-size: 1.1rem;
-  color: #111;
-  margin-bottom: 1.25rem;
-}
-
-.admin-table-wrap h2::after { display: none; }
 
 .table-scroll { overflow-x: auto; }
 
@@ -153,16 +192,22 @@ th {
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 td {
   padding: 0.85rem 1rem;
   border-bottom: 1px solid #f0f0f0;
   color: #333;
+  white-space: nowrap;
 }
+
+.td-name { font-weight: 600; }
 
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #fafafa; }
+
+.row-completed td { opacity: 0.6; }
 
 .service-tag {
   background: #111;
@@ -173,62 +218,117 @@ tr:hover td { background: #fafafa; }
   white-space: nowrap;
 }
 
-/* Booking status styles */
-tr.completed-booking {
-  background-color: #e8f5e8;
-}
-
-tr.pending-booking {
-  background-color: #fef5e8;
-}
-
-/* Status badges */
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.status-completed {
-  background-color: #4caf50;
-  color: white;
-}
-
-.status-pending {
-  background-color: #f44336;
-  color: white;
-}
-
-/* Status toggle buttons */
-.status-toggle {
-  padding: 0.5rem 1rem;
+/* Status toggle button */
+.status-btn {
+  padding: 0.3rem 0.75rem;
   border: none;
-  border-radius: 4px;
-  font-size: 0.78rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.toggle-completed {
-  background-color: #f44336;
-  color: white;
+.status-done {
+  background: #e8f5e9;
+  color: #2e7d32;
 }
 
-.toggle-completed:hover {
-  background-color: #d32f2f;
+.status-done:hover { background: #c8e6c9; }
+
+.status-pend {
+  background: #fff3e0;
+  color: #e65100;
 }
 
-.toggle-pending {
-  background-color: #4caf50;
-  color: white;
+.status-pend:hover { background: #ffe0b2; }
+
+/* Delete button */
+.delete-btn {
+  background: none;
+  border: 1px solid transparent;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  opacity: 0.5;
 }
 
-.toggle-pending:hover {
-  background-color: #388e3c;
+.delete-btn:hover {
+  opacity: 1;
+  background: #ffebee;
+  border-color: #ef9a9a;
 }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.modal-box h3 {
+  font-size: 1.2rem;
+  color: #111;
+  margin-bottom: 0.5rem;
+}
+
+.modal-box p {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.btn-cancel {
+  padding: 0.6rem 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #555;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover { background: #f5f5f5; }
+
+.btn-delete {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: #d32f2f;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-delete:hover { background: #b71c1c; }
+.btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .no-bookings {
   color: #aaa;
@@ -251,19 +351,10 @@ tr.pending-booking {
   }
 
   .sidebar-brand { margin-bottom: 0; font-size: 1rem; flex: 1; }
-
   .sidebar-nav { flex-direction: row; flex: none; }
+  .sidebar-logout { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
 
-  .sidebar-logout {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .admin-main {
-    margin-left: 0;
-    padding: 1rem;
-  }
-
+  .admin-main { margin-left: 0; padding: 1rem; }
   .admin-topbar h1 { font-size: 1.2rem; }
 
   .admin-stats {
@@ -271,20 +362,14 @@ tr.pending-booking {
     gap: 0.75rem;
   }
 
-  .stat-card {
-    padding: 1rem;
-    gap: 0.75rem;
-  }
-
+  .stat-card { padding: 1rem; gap: 0.75rem; }
   .stat-icon { font-size: 1.5rem; }
   .stat-value { font-size: 1.4rem; }
 
   .admin-table-wrap { padding: 1rem; }
+  .table-header { flex-direction: column; align-items: flex-start; }
+  .search-input { width: 100%; }
 
-  th, td {
-    padding: 0.6rem 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .service-tag { font-size: 0.72rem; padding: 0.2rem 0.5rem; }
+  th, td { padding: 0.6rem 0.5rem; font-size: 0.78rem; }
+  .service-tag { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
 }
