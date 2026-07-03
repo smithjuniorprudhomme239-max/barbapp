@@ -86,11 +86,13 @@ export default function Contact() {
         }])
 
       if (supabaseError) {
+        console.error('Supabase error:', supabaseError)
         setError(supabaseError.message || 'Booking failed.')
       } else {
         setSent(true)
       }
     } catch (err) {
+      console.error('Booking error:', err)
       setError('Network error. Please try again.')
     } finally {
       setSubmitting(false)
