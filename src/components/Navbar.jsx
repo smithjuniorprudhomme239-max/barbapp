@@ -6,7 +6,7 @@ const links = ['Services', 'Gallery', 'About', 'Contact']
 
 export default function Navbar({ onAdminClick, onUserAuthClick, onMarketClick }) {
   const [open, setOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const { user, isAdmin, logout } = useAuth()
 
   return (
     <nav className="navbar">
@@ -18,13 +18,29 @@ export default function Navbar({ onAdminClick, onUserAuthClick, onMarketClick })
         ))}
         <li><a href="#contact" className="btn-book" onClick={() => setOpen(false)}>Book Now</a></li>
         <li><button className="btn-book" onClick={() => { setOpen(false); onMarketClick(); }}>Market</button></li>
-        <li>
-          {user
-            ? <button className="btn-admin" onClick={logout} style={{ color: '#cc0000' }}>⬅ Logout</button>
-            : <button className="btn-admin" onClick={onUserAuthClick}>Login / Sign Up</button>
-          }
-        </li>
-        <li><button className="btn-admin" onClick={onAdminClick}>Admin</button></li>
+        {user
+          ? (
+            <>
+              {isAdmin && (
+                <li key="dashboard">
+                  <button className="btn-admin btn-dashboard" onClick={() => { setOpen(false); onAdminClick(); }}>
+                    Dashboard
+                  </button>
+                </li>
+              )}
+              <li key="logout">
+                <button className="btn-admin" onClick={logout} style={{ color: '#cc0000' }}>
+                  Logout
+                </button>
+              </li>
+            </>
+          )
+          : (
+            <li>
+              <button className="btn-admin" onClick={onUserAuthClick}>Login / Sign Up</button>
+            </li>
+          )
+        }
       </ul>
     </nav>
   )

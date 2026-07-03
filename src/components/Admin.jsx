@@ -1,10 +1,8 @@
 import { useEffect, useState, useMemo } from 'react'
-import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import './Admin.css'
 
 export default function Admin({ onLogout }) {
-  const { adminLogout } = useAuth()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -49,8 +47,7 @@ export default function Admin({ onLogout }) {
     fetchBookings()
   }, [])
 
-  const handleLogout = async () => {
-    await adminLogout()
+  const handleBack = () => {
     onLogout()
   }
 
@@ -116,7 +113,7 @@ export default function Admin({ onLogout }) {
         <nav className="sidebar-nav">
           <span className="sidebar-link active">📋 Bookings</span>
         </nav>
-        <button className="sidebar-logout" onClick={handleLogout}>⬅ Logout</button>
+        <button className="sidebar-logout" onClick={handleBack}>← Back</button>
       </aside>
 
       <main className="admin-main">

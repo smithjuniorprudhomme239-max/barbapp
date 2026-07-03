@@ -3,7 +3,7 @@
   height: 100vh;
   min-height: 500px;
   max-height: 800px;
-  background: #1a1a1a url('https://i.postimg.cc/cHB0ht4b/Gemini-Generated-Image-8fy4xn8fy4xn8fy4.png') center/cover no-repeat;
+  background: #1a1a1a url('https://i.postimg.cc/cHB0ht4b/Gemini-Generated-Image-8fy4xn8fy4xn8fy4.png') top/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
