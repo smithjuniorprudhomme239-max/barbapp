@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><title>Icon Generator</title></head>
+<body style="text-align:center;font-family:sans-serif;padding:20px;">
+  <h2>🖼️ App Icon Generator</h2>
+  <p>Click each button to download the PNG icon</p>
+  <canvas id="c192" width="192" height="192" style="display:none"></canvas>
+  <canvas id="c512" width="512" height="512" style="display:none"></canvas>
+  <button onclick="download(192)">Download 192x192</button>
+  <button onclick="download(512)">Download 512x512</button>
+  <script>
+    function draw(size) {
+      const c = document.getElementById('c' + size);
+      const ctx = c.getContext('2d');
+      // White rounded box
+      const r = size * 0.1875;
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.moveTo(r, 0); ctx.lineTo(size - r, 0);
+      ctx.arcTo(size, 0, size, r, r);
+      ctx.lineTo(size, size - r);
+      ctx.arcTo(size, size, size - r, size, r);
+      ctx.lineTo(r, size);
+      ctx.arcTo(0, size, 0, size - r, r);
+      ctx.lineTo(0, r);
+      ctx.arcTo(0, 0, r, 0, r);
+      ctx.fill();
+      // Scissors text centered
+      ctx.fillStyle = '#333';
+      ctx.font = (size * 0.35) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✂', size / 2, size / 2);
+    }
+    function download(size) {
+      draw(size);
+      const c = document.getElementById('c' + size);
+      const a = document.createElement('a');
+      a.download = 'icon-' + size + '.png';
+      a.href = c.toDataURL('image/png');
+      a.click();
+    }
+  </script>
+</body>
+</html>
