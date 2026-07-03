@@ -99,8 +99,9 @@
   .hero-round-btn {
     width: 72px;
     height: 72px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     bottom: 1rem;
     right: 1rem;
+    padding: 10px;
   }
 }
