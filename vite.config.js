@@ -9,20 +9,7 @@ export default defineConfig({
     port: 5173
   },
   build: {
-    // Generate smaller bundles
     minify: 'esbuild',
-    cssMinify: true,
-    reportCompressedSize: false,
-    // Chunk optimization
-    chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
-            return 'vendor'
-          }
-        }
-      }
-    }
+    cssMinify: true
   }
 })
