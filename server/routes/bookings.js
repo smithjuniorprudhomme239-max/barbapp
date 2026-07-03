@@ -2,15 +2,15 @@ const router = require('express').Router()
 const { getDb, save } = require('../db')
 const { authMiddleware, adminMiddleware } = require('../middleware')
 
-// Create a booking (logged in users)
-router.post('/', authMiddleware, async (req, res) => {
+// Create a booking - PUBLIC (anyone can book without login)
+router.post('/', async (req, res) => {
   const { name, phone, service, date } = req.body
   if (!name || !phone || !service || !date) return res.status(400).json({ error: 'All fields required' })
 
   const db = await getDb()
   db.run(
     `INSERT INTO bookings (user_id, name, phone, service, date) VALUES (?, ?, ?, ?, ?)`,
-    [req.user.id, name, phone, service, date]
+    [null, name, phone, service, date]
   )
   save()
   res.json({ message: 'Booking created successfully' })

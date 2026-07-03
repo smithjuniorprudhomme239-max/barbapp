@@ -11,7 +11,7 @@ export default function Navbar({ onAdminClick, onUserAuthClick, onMarketClick })
   return (
     <nav className="navbar">
       <a href="#hero" className="brand">✂ DuckensBarber</a>
-      <button className="burger" onClick={() => { console.log('Burger clicked, toggling menu'); setOpen(!open); }}>☰</button>
+      <button className="burger" onClick={() => setOpen(!open)}>☰</button>
       <ul className={open ? 'nav-links open' : 'nav-links'}>
         {links.map(l => (
           <li key={l}><a href={`#${l.toLowerCase()}`} onClick={() => setOpen(false)}>{l}</a></li>

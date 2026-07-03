@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../context/AuthContext'
 import './MarketPage.css'
 
 export default function MarketPage({ onBack }) {
@@ -10,23 +9,15 @@ export default function MarketPage({ onBack }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Products are not yet available via the backend API.
+    // Using placeholder data for now.
     const fetchProducts = async () => {
       try {
-        console.log('Fetching products from Supabase...')
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-        
-        if (error) {
-          console.error('Error fetching products:', error)
-          setLoading(false)
-        } else {
-          console.log('Products fetched successfully:', data)
-          setProducts(Array.isArray(data) ? data : [])
-          setLoading(false)
-        }
+        // Placeholder products - in production this would fetch from an API
+        setProducts([])
       } catch (error) {
         console.error('Unexpected error fetching products:', error)
+      } finally {
         setLoading(false)
       }
     }
@@ -72,7 +63,7 @@ export default function MarketPage({ onBack }) {
         {loading ? (
           <p className="loading-products">Loading products...</p>
         ) : products.length === 0 ? (
-          <p className="no-products">No products available.</p>
+          <p className="no-products">No products available yet.</p>
         ) : (
           products.map(product => (
             <div 

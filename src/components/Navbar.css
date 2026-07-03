@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: space-between;
   padding: clamp(0.75rem, 3vw, 1rem) clamp(1rem, 4vw, 2rem);
-  background: #111;
+  background: var(--color-primary, #111);
   z-index: 100;
   min-height: 60px;
 }
@@ -31,44 +31,46 @@
   color: #ccc;
   text-decoration: none;
   font-size: clamp(0.85rem, 2vw, 0.95rem);
-  transition: color 0.2s;
+  transition: color var(--transition-fast, 0.2s);
   white-space: nowrap;
 }
 
 .nav-links a:hover { color: #fff; }
 
 .btn-book {
-  background: #f5c518;
-  color: #111 !important;
+  background: var(--color-secondary, #b8933e);
+  color: #fff !important;
   padding: clamp(0.5rem, 2vw, 0.6rem) clamp(0.8rem, 3vw, 1rem);
-  border-radius: 4px;
+  border-radius: var(--radius-md, 8px);
   font-weight: 600;
   font-size: clamp(0.85rem, 2vw, 0.95rem);
-  min-height: 44px; /* Touch-friendly minimum size */
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  cursor: pointer;
 }
 
-.btn-book:hover { background: #e0b015 !important; }
+.btn-book:hover { background: var(--color-secondary-dark, #a07d2e) !important; }
 
 .btn-admin {
   background: none;
   border: 1px solid #555;
   color: #aaa;
   padding: clamp(0.5rem, 2vw, 0.6rem) clamp(0.6rem, 2vw, 0.8rem);
-  border-radius: 4px;
+  border-radius: var(--radius-md, 8px);
   cursor: pointer;
   font-size: clamp(0.8rem, 2vw, 0.9rem);
-  transition: border-color 0.2s, color 0.2s;
-  min-height: 44px; /* Touch-friendly minimum size */
+  transition: border-color var(--transition-fast, 0.2s), color var(--transition-fast, 0.2s);
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
 }
 
-.btn-admin:hover { border-color: #fff; color: #fff; }
+.btn-admin:hover { border-color: var(--color-secondary, #b8933e); color: var(--color-secondary, #b8933e); }
 
 .burger {
   display: none;
@@ -80,8 +82,8 @@
   min-width: 44px;
   min-height: 44px;
   padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  border-radius: var(--radius-sm, 4px);
+  transition: background-color var(--transition-fast, 0.2s);
 }
 
 .burger:hover {

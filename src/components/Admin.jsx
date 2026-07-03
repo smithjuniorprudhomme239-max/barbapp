@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react'
-import { useAuth, supabase } from '../context/AuthContext'
+import { useAuth } from '../context/AuthContext'
+import API from '../api'
 import './Admin.css'
 
 export default function Admin({ onLogout }) {
-  const { adminLogout, user } = useAuth()
+  const { adminLogout, user, getAdminToken } = useAuth()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
 
   const fetchBookings = async () => {
     console.log('Fetching bookings...')
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('*')
-      .order('date', { ascending: true })
-    
-    if (error) {
-      console.error('Error fetching bookings:', error)
-      setLoading(false)
-    } else {
+    setLoading(true)
+    try {
+      const token = getAdminToken()
+      const res = await fetch(`${API}/bookings`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await res.json()
       console.log('Bookings fetched:', data)
       setBookings(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Error fetching bookings:', error)
+    } finally {
       setLoading(false)
     }
   }
@@ -27,22 +29,6 @@ export default function Admin({ onLogout }) {
   useEffect(() => {
     fetchBookings()
   }, [])
-
-  const toggleBookingStatus = async (bookingId, currentStatus) => {
-    console.log('Toggling booking status:', bookingId, 'Current status:', currentStatus, 'New status:', !currentStatus)
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status: !currentStatus })
-      .eq('id', bookingId)
-    
-    if (error) {
-      console.error('Error updating booking status:', error)
-    } else {
-      console.log('Booking status updated successfully')
-      // Refresh bookings after update
-      fetchBookings()
-    }
-  }
 
   const handleLogout = async () => { 
     await adminLogout()
@@ -113,32 +99,17 @@ export default function Admin({ onLogout }) {
                     <th>Email</th>
                     <th>Service</th>
                     <th>Date & Time</th>
-                    <th>Status</th>
-                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {bookings.map((b, i) => (
-                    <tr key={b.id} className={b.status ? 'completed-booking' : 'pending-booking'}>
+                    <tr key={b.id}>
                       <td>{i + 1}</td>
                       <td>{b.name}</td>
                       <td>{b.phone}</td>
                       <td>{b.email || '—'}</td>
                       <td><span className="service-tag">{b.service}</span></td>
                       <td>{new Date(b.date).toLocaleString()}</td>
-                      <td>
-                        <span className={`status-badge ${b.status ? 'status-completed' : 'status-pending'}`}>
-                          {b.status ? 'Completed' : 'Pending'}
-                        </span>
-                      </td>
-                      <td>
-                        <button 
-                          className={`status-toggle ${b.status ? 'toggle-completed' : 'toggle-pending'}`}
-                          onClick={() => toggleBookingStatus(b.id, b.status)}
-                        >
-                          {b.status ? 'Mark as Pending' : 'Mark as Completed'}
-                        </button>
-                      </td>
                     </tr>
                   ))}
                 </tbody>

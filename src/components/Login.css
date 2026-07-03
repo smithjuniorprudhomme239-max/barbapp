@@ -75,26 +75,26 @@
 
 .login-form input:focus {
   outline: none;
-  border-color: #f5c518;
-  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.1);
+  border-color: #b8933e;
+  box-shadow: 0 0 0 3px rgba(184, 147, 62, 0.12);
   background: #fff;
 }
 
 .login-form button {
   padding: 1rem;
-  background: linear-gradient(135deg, #111 0%, #333 100%);
+  background: #b8933e;
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 700;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .login-form button:hover {
-  background: linear-gradient(135deg, #333 0%, #444 100%);
+  background: #a07d2e;
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.2);
 }
@@ -150,8 +150,8 @@
 }
 
 .close-btn:hover {
-  color: #f5c518;
-  background: rgba(245, 197, 24, 0.1);
+  color: #b8933e;
+  background: rgba(184, 147, 62, 0.1);
   transform: rotate(90deg);
 }
 

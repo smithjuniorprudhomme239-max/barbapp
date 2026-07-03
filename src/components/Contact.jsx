@@ -1,232 +1,261 @@
-import { useState, useEffect } from 'react'
-import { useAuth, supabase } from '../context/AuthContext'
+import { useState, useMemo } from 'react'
+import API from '../api'
 import './Contact.css'
 
+const SERVICES = [
+  'Classic Haircut',
+  'Fade & Taper',
+  'Beard Trim',
+  'Hot Towel Shave',
+  'Hair + Beard Combo',
+  'Kids Cut'
+]
+
+const WEEKDAY_SLOTS = [
+  '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+  '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
+  '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM',
+  '6:00 PM', '6:30 PM'
+]
+
+const SUNDAY_SLOTS = [
+  '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+  '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM',
+  '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM'
+]
+
+const BOSTON_TZ = 'America/New_York'
+
+function getBostonToday() {
+  const now = new Date()
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: BOSTON_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now)
+  return parts
+}
+
+function getDayOfWeek(dateStr) {
+  if (!dateStr) return -1
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const utcDate = new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
+  return utcDate.getUTCDay()
+}
+
+function isSunday(dateStr) {
+  return getDayOfWeek(dateStr) === 0
+}
+
 export default function Contact() {
-  const { user } = useAuth()
-  const [form, setForm] = useState({ name: '', phone: '', date: '', service: '' })
+  const [step, setStep] = useState(1)
+  const [form, setForm] = useState({ name: '', phone: '', date: getBostonToday(), time: '', service: '' })
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
-  const [bookedAppointments, setBookedAppointments] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [userAppointments, setUserAppointments] = useState([])
-  const [loadingUserAppointments, setLoadingUserAppointments] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  const handle = e => {
-    const newForm = { ...form, [e.target.name]: e.target.value }
-    setForm(newForm)
-    
-    // Fetch booked appointments when date changes
-    if (e.target.name === 'date' && newForm.date) {
-      fetchBookedAppointments(newForm.date)
+  const update = (field, value) => {
+    if (field === 'date') {
+      setForm(prev => ({ ...prev, date: value, time: '' }))
+    } else {
+      setForm(prev => ({ ...prev, [field]: value }))
     }
   }
 
-  const fetchBookedAppointments = async (date) => {
-    if (!date) {
-      setBookedAppointments([])
-      return
-    }
+  const timeSlots = useMemo(() => {
+    return isSunday(form.date) ? SUNDAY_SLOTS : WEEKDAY_SLOTS
+  }, [form.date])
 
-    setLoading(true)
-    try {
-      // Parse the selected date to get start and end of day
-      const selectedDate = new Date(date)
-      const startOfDay = new Date(selectedDate.setHours(0, 0, 0, 0))
-      const endOfDay = new Date(selectedDate.setHours(23, 59, 59, 999))
-
-      const { data, error: supabaseError } = await supabase
-        .from('bookings')
-        .select('*')
-        .gte('date', startOfDay.toISOString())
-        .lte('date', endOfDay.toISOString())
-        .order('date', { ascending: true })
-
-      if (supabaseError) {
-        console.error('Error fetching booked appointments:', supabaseError)
-      } else {
-        setBookedAppointments(Array.isArray(data) ? data : [])
-      }
-    } catch (error) {
-      console.error('Error fetching booked appointments:', error)
-    } finally {
-      setLoading(false)
-    }
+  const canNext = () => {
+    if (step === 1) return form.service !== ''
+    if (step === 2) return form.date !== '' && form.time !== ''
+    return true
   }
-
-  const fetchUserAppointments = async () => {
-    if (!user) {
-      setUserAppointments([])
-      return
-    }
-
-    setLoadingUserAppointments(true)
-    try {
-      const { data, error: supabaseError } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: true })
-
-      if (supabaseError) {
-        console.error('Error fetching user appointments:', supabaseError)
-      } else {
-        setUserAppointments(Array.isArray(data) ? data : [])
-      }
-    } catch (error) {
-      console.error('Error fetching user appointments:', error)
-    } finally {
-      setLoadingUserAppointments(false)
-    }
-  }
-
-  const deleteAppointment = async (appointmentId) => {
-    if (!user) return
-
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', appointmentId)
-        .eq('user_id', user.id)
-
-      if (error) {
-        console.error('Error deleting appointment:', error)
-        setError('Failed to delete appointment.')
-      } else {
-        // Refresh appointments after deletion
-        fetchUserAppointments()
-      }
-    } catch (error) {
-      console.error('Error deleting appointment:', error)
-      setError('Failed to delete appointment.')
-    }
-  }
-
-  // Fetch user appointments when component mounts or user changes
-  useEffect(() => {
-    if (user) {
-      fetchUserAppointments()
-    }
-  }, [user])
 
   const submit = async e => {
     e.preventDefault()
     setError('')
+    setSubmitting(true)
 
-    if (!user) return setError('Please login or sign up to book an appointment.')
+    const dateTime = `${form.date}T${convertTime(form.time)}`
 
-    const { data, error: supabaseError } = await supabase
-      .from('bookings')
-      .insert({
-        ...form,
-        user_id: user.id
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000)
+
+      const res = await fetch(`${API}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          service: form.service,
+          date: dateTime
+        }),
+        signal: controller.signal
       })
-      .select()
-      .single()
 
-    if (supabaseError) {
-      setError(supabaseError.message || 'Booking failed.')
-    } else {
-      setSent(true)
+      clearTimeout(timeout)
+
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Booking failed.')
+      } else {
+        setSent(true)
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        setError('Request timed out. Please check your connection and try again.')
+      } else {
+        setError('Network error. Please try again.')
+      }
+    } finally {
+      setSubmitting(false)
     }
+  }
+
+  const convertTime = (t) => {
+    const [time, period] = t.split(' ')
+    let [h, m] = time.split(':')
+    h = parseInt(h)
+    if (period === 'PM' && h !== 12) h += 12
+    if (period === 'AM' && h === 12) h = 0
+    return `${String(h).padStart(2, '0')}:${m}:00`
+  }
+
+  const resetForm = () => {
+    setSent(false)
+    setForm({ name: '', phone: '', date: getBostonToday(), time: '', service: '' })
+    setStep(1)
+  }
+
+  const bostonToday = getBostonToday()
+
+  if (sent) {
+    return (
+      <section id="contact" className="section contact">
+        <div className="booking-success">
+          <div className="success-icon">✓</div>
+          <h2>Appointment Booked!</h2>
+          <p>Thanks, <strong>{form.name}</strong>! Your <strong>{form.service}</strong> is scheduled for:</p>
+          <p className="success-date">
+            {new Date(form.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: BOSTON_TZ })}
+            {' '}at {form.time}
+          </p>
+          <p className="success-note">We'll send you a confirmation shortly.</p>
+          <button className="okay-button" onClick={resetForm}>
+            Book Another
+          </button>
+        </div>
+      </section>
+    )
   }
 
   return (
     <section id="contact" className="section contact">
-      <h2>Book an Appointment</h2>
-      <div className="contact-inner">
+      <div className="booking-container">
+        <h2>Book an Appointment</h2>
+        <p className="booking-subtitle">Quick and easy — no account needed</p>
+
+        <div className="booking-steps">
+          <span className={`step-dot ${step >= 1 ? 'active' : ''}`}>1</span>
+          <span className={`step-line ${step >= 2 ? 'active' : ''}`} />
+          <span className={`step-dot ${step >= 2 ? 'active' : ''}`}>2</span>
+          <span className={`step-line ${step >= 3 ? 'active' : ''}`} />
+          <span className={`step-dot ${step >= 3 ? 'active' : ''}`}>3</span>
+        </div>
+
+        <form onSubmit={submit} className="booking-form">
+          {/* Step 1: Choose Service */}
+          {step === 1 && (
+            <div className="step-content">
+              <h3>Choose Your Service</h3>
+              <div className="service-grid">
+                {SERVICES.map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={`service-card ${form.service === s ? 'selected' : ''}`}
+                    onClick={() => update('service', s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Pick Date & Time */}
+          {step === 2 && (
+            <div className="step-content">
+              <h3>Pick Date &amp; Time</h3>
+              <p className="step-hint">
+                {isSunday(form.date) ? 'Sunday hours: 10 AM – 4 PM' : 'Mon–Sat: 9 AM – 7 PM'}
+              </p>
+              <input
+                type="date"
+                value={form.date}
+                min={bostonToday}
+                onChange={e => update('date', e.target.value)}
+                required
+              />
+              <div className="time-grid">
+                {timeSlots.map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={`time-slot ${form.time === t ? 'selected' : ''}`}
+                    onClick={() => update('time', t)}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Your Info */}
+          {step === 3 && (
+            <div className="step-content">
+              <h3>Your Details</h3>
+              <input
+                name="name"
+                placeholder="Your Full Name"
+                value={form.name}
+                onChange={e => update('name', e.target.value)}
+                required
+              />
+              <input
+                name="phone"
+                type="tel"
+                placeholder="Phone Number"
+                value={form.phone}
+                onChange={e => update('phone', e.target.value)}
+                required
+              />
+              {error && <p className="form-error">{error}</p>}
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="step-buttons">
+            {step > 1 && (
+              <button type="button" className="btn-back" onClick={() => setStep(step - 1)}>
+                ← Back
+              </button>
+            )}
+            {step < 3 ? (
+              <button type="button" className="btn-next" onClick={() => canNext() && setStep(step + 1)} disabled={!canNext()}>
+                Continue →
+              </button>
+            ) : (
+              <button type="submit" className="btn-submit" disabled={submitting}>
+                {submitting ? 'Booking...' : 'Confirm Booking'}
+              </button>
+            )}
+          </div>
+        </form>
+
         <div className="contact-info">
-          <p>📞 (555) 123-4567</p>
-          <p>✉️ hello@fadeking.com</p>
+          <p>✉️ dukenssmithp@gmail.com</p>
           <p>🕐 Mon–Sat: 9am – 7pm</p>
           <p>🕐 Sun: 10am – 4pm</p>
-        </div>
-        <div className="appointments-container">
-          <div className="booking-form-column">
-            {/* Booking Form */}
-            {sent ? (
-              <div className="thanks">
-                <h3>Thanks, {form.name}! 🎉</h3>
-                <p>We'll confirm your appointment shortly.</p>
-                <button 
-                  className="okay-button"
-                  onClick={() => window.location.reload()}
-                >
-                  Okay
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={submit} className="booking-form">
-                <input name="name" placeholder="Your Name" value={form.name} onChange={handle} required />
-                <input name="phone" placeholder="Phone Number" value={form.phone} onChange={handle} required />
-                <input name="date" type="datetime-local" value={form.date} onChange={handle} required />
-                <select name="service" value={form.service} onChange={handle} required>
-                  <option value="">Select a Service</option>
-                  <option>Classic Haircut</option>
-                  <option>Fade & Taper</option>
-                  <option>Beard Trim</option>
-                  <option>Hot Towel Shave</option>
-                  <option>Hair + Beard Combo</option>
-                  <option>Kids Cut</option>
-                </select>
-                {error && <p style={{ color: '#cc0000', fontSize: '0.85rem' }}>{error}</p>}
-                <button type="submit">Book Now</button>
-              </form>
-            )}
-          </div>
-          <div className="appointments-section">
-            {/* User's Appointments */}
-            {user && (
-              <div className="user-appointments">
-                <h3>Your Appointments</h3>
-                {loadingUserAppointments ? (
-                  <p>Loading your appointments...</p>
-                ) : userAppointments.length === 0 ? (
-                  <p>You don't have any appointments yet.</p>
-                ) : (
-                  <ul className="appointments-list">
-                    {userAppointments.map((appointment, index) => (
-                      <li key={index} className="appointment-item">
-                        <span className="appointment-time">{new Date(appointment.date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}</span>
-                        <span className="appointment-service">{appointment.service}</span>
-                        <button className={`appointment-status-btn ${appointment.status ? 'status-completed' : 'status-pending'}`}>
-                          {appointment.status ? 'Completed' : 'Pending'}
-                        </button>
-                        <button 
-                          className="delete-appointment-btn"
-                          onClick={() => deleteAppointment(appointment.id)}
-                        >
-                          Delete
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-
-            {/* Booked Appointments for Selected Date */}
-            {form.date && (
-              <div className="booked-appointments">
-                <h3>Booked Appointments for {new Date(form.date).toLocaleDateString()}</h3>
-                {loading ? (
-                  <p>Loading booked appointments...</p>
-                ) : bookedAppointments.length === 0 ? (
-                  <p>No appointments booked yet for this date.</p>
-                ) : (
-                  <ul className="appointments-list">
-                    {bookedAppointments.map((appointment, index) => (
-                      <li key={index} className="appointment-item">
-                        <span className="appointment-time">{new Date(appointment.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</span>
-                        <span className="appointment-status">Booked</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </section>

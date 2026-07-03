@@ -7,5 +7,21 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173
+  },
+  build: {
+    // Generate smaller bundles
+    minify: 'esbuild',
+    cssMinify: true,
+    reportCompressedSize: false,
+    // Chunk optimization
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          supabase: ['@supabase/supabase-js']
+        }
+      }
+    }
   }
 })
