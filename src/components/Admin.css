@@ -78,6 +78,13 @@
   color: #111;
 }
 
+.topbar-clock {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.2rem;
+  display: block;
+}
+
 .admin-badge {
   background: #111;
   color: #fff;

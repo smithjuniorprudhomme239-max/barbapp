@@ -26,10 +26,31 @@ const SUNDAY_SLOTS = [
 
 const BOSTON_TZ = 'America/New_York'
 
+function toBostonISO(dateStr, timeStr) {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const [h, min] = timeStr.split(':').map(Number)
+  const bostonDate = new Date(Date.UTC(y, m - 1, d, h, min, 0))
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: BOSTON_TZ,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
+  })
+
+  const parts = formatter.formatToParts(bostonDate)
+  const get = (type) => parts.find(p => p.type === type)?.value
+
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}:${get('second')}`
+}
+
 function getBostonToday() {
   const now = new Date()
-  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: BOSTON_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now)
-  return parts
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: BOSTON_TZ,
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  })
+  return formatter.format(now)
 }
 
 function getDayOfWeek(dateStr) {
@@ -73,7 +94,7 @@ export default function Contact() {
     setError('')
     setSubmitting(true)
 
-    const dateTime = `${form.date}T${convertTime(form.time)}`
+    const dateTime = toBostonISO(form.date, convertTime(form.time))
 
     try {
       // Check if slot is already taken

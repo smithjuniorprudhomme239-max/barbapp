@@ -19,6 +19,24 @@ export default function Admin({ onLogout }) {
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const bostonTime = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  }).format(now)
 
   const fetchBookings = async () => {
     setLoading(true)
@@ -117,7 +135,10 @@ export default function Admin({ onLogout }) {
 
       <main className="admin-main">
         <div className="admin-topbar">
-          <h1>Dashboard</h1>
+          <div>
+            <h1>Dashboard</h1>
+            <span className="topbar-clock">{bostonTime}</span>
+          </div>
           <span className="admin-badge">👤 admin</span>
         </div>
 
