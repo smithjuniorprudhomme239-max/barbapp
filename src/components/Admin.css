@@ -45,18 +45,19 @@
 .sidebar-link.active { background: #222; color: #fff; }
 
 .sidebar-logout {
-  background: none;
-  border: 1px solid #333;
-  color: #aaa;
+  background: #2e7d32;
+  border: none;
+  color: #fff;
   padding: 0.6rem 0.75rem;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
-  text-align: left;
-  transition: border-color 0.2s, color 0.2s;
+  text-align: center;
+  font-weight: 600;
+  transition: background 0.2s;
 }
 
-.sidebar-logout:hover { border-color: #fff; color: #fff; }
+.sidebar-logout:hover { background: #1b5e20; }
 
 /* Main content */
 .admin-main {
@@ -116,14 +117,6 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
-
-.stat-card.highlight {
-  background: linear-gradient(135deg, #2e7d32, #43a047);
-  color: #fff;
-}
-
-.stat-card.highlight .stat-value,
-.stat-card.highlight .stat-label { color: #fff; }
 
 .stat-icon { font-size: 2rem; }
 

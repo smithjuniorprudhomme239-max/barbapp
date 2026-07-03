@@ -3,15 +3,6 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import './Admin.css'
 
-const PRICES = {
-  'Classic Haircut': 25,
-  'Fade & Taper': 30,
-  'Beard Trim': 15,
-  'Hot Towel Shave': 45,
-  'Hair + Beard Combo': 40,
-  'Kids Cut': 25
-}
-
 export default function Admin({ onLogout }) {
   const { adminLogout } = useAuth()
   const [bookings, setBookings] = useState([])
@@ -107,11 +98,7 @@ export default function Admin({ onLogout }) {
   }, [bookings, search])
 
   const today = bookings.filter(b => new Date(b.date).toDateString() === new Date().toDateString()).length
-  const completedCount = bookings.filter(b => b.status === 'completed').length
   const pendingCount = bookings.filter(b => b.status === 'pending' || !b.status).length
-  const totalRevenue = bookings
-    .filter(b => b.status === 'completed')
-    .reduce((sum, b) => sum + (PRICES[b.service] || 0), 0)
 
   const formatDate = (dateStr) => {
     const d = new Date(dateStr)
@@ -158,24 +145,10 @@ export default function Admin({ onLogout }) {
             </div>
           </div>
           <div className="stat-card">
-            <span className="stat-icon">✅</span>
-            <div>
-              <p className="stat-value">{completedCount}</p>
-              <p className="stat-label">Completed</p>
-            </div>
-          </div>
-          <div className="stat-card">
             <span className="stat-icon">⏳</span>
             <div>
               <p className="stat-value">{pendingCount}</p>
               <p className="stat-label">Pending</p>
-            </div>
-          </div>
-          <div className="stat-card highlight">
-            <span className="stat-icon">💰</span>
-            <div>
-              <p className="stat-value">${totalRevenue}</p>
-              <p className="stat-label">Revenue</p>
             </div>
           </div>
         </div>
