@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import API from '../api'
+import { supabase } from '../lib/supabaseClient'
 import './Contact.css'
 
 const SERVICES = [
@@ -76,35 +76,22 @@ export default function Contact() {
     const dateTime = `${form.date}T${convertTime(form.time)}`
 
     try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 10000)
-
-      const res = await fetch(`${API}/bookings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { error: supabaseError } = await supabase
+        .from('bookings')
+        .insert([{
           name: form.name,
           phone: form.phone,
           service: form.service,
           date: dateTime
-        }),
-        signal: controller.signal
-      })
+        }])
 
-      clearTimeout(timeout)
-
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error || 'Booking failed.')
+      if (supabaseError) {
+        setError(supabaseError.message || 'Booking failed.')
       } else {
         setSent(true)
       }
     } catch (err) {
-      if (err.name === 'AbortError') {
-        setError('Request timed out. Please check your connection and try again.')
-      } else {
-        setError('Network error. Please try again.')
-      }
+      setError('Network error. Please try again.')
     } finally {
       setSubmitting(false)
     }
