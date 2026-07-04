@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import './Admin.css'
 
+const BOSTON_TZ = 'America/New_York'
+
 export default function Admin({ onLogout }) {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -16,7 +18,7 @@ export default function Admin({ onLogout }) {
   }, [])
 
   const bostonTime = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/New_York',
+    timeZone: BOSTON_TZ,
     weekday: 'long',
     year: 'numeric',
     month: 'short',
@@ -93,17 +95,29 @@ export default function Admin({ onLogout }) {
     )
   }, [bookings, search])
 
-  const today = bookings.filter(b => new Date(b.date).toDateString() === new Date().toDateString()).length
+  const bostonTodayStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: BOSTON_TZ,
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date())
+  const today = bookings.filter(b => {
+    const [datePart] = (b.date || '').split('T')
+    return datePart === bostonTodayStr
+  }).length
   const pendingCount = bookings.filter(b => b.status === 'pending' || !b.status).length
 
   const formatDate = (dateStr) => {
-    const d = new Date(dateStr)
-    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+    const [datePart] = (dateStr || '').split('T')
+    const [y, m, d] = datePart.split('-').map(Number)
+    const date = new Date(y, m - 1, d)
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
   }
 
   const formatTime = (dateStr) => {
-    const d = new Date(dateStr)
-    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    const [, timePart] = (dateStr || '').split('T')
+    const [h, min] = (timePart || '0:0').split(':').map(Number)
+    const period = h >= 12 ? 'PM' : 'AM'
+    const displayHour = h === 0 ? 12 : h > 12 ? h - 12 : h
+    return `${displayHour}:${String(min).padStart(2, '0')} ${period}`
   }
 
   return (

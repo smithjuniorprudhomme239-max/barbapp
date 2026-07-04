@@ -96,6 +96,10 @@
 }
 
 @media (max-width: 480px) {
+  .hero {
+    background-position: right center;
+  }
+
   .hero-round-btn {
     width: 72px;
     height: 72px;

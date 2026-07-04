@@ -29,19 +29,14 @@ const BOSTON_TZ = 'America/New_York'
 function toBostonISO(dateStr, timeStr) {
   const [y, m, d] = dateStr.split('-').map(Number)
   const [h, min] = timeStr.split(':').map(Number)
-  const bostonDate = new Date(Date.UTC(y, m - 1, d, h, min, 0))
 
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: BOSTON_TZ,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: false
-  })
+  const Y = String(y).padStart(4, '0')
+  const M = String(m).padStart(2, '0')
+  const D = String(d).padStart(2, '0')
+  const H = String(h).padStart(2, '0')
+  const MN = String(min).padStart(2, '0')
 
-  const parts = formatter.formatToParts(bostonDate)
-  const get = (type) => parts.find(p => p.type === type)?.value
-
-  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}:${get('second')}`
+  return `${Y}-${M}-${D}T${H}:${MN}:00`
 }
 
 function getBostonToday() {
