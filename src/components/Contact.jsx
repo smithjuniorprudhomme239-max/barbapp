@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import './Contact.css'
 
@@ -8,7 +8,8 @@ const SERVICES = [
   'Beard Trim',
   'Hot Towel Shave',
   'Hair + Beard Combo',
-  'Kids Cut'
+  'Kids Cut',
+  'Line Up'
 ]
 
 const WEEKDAY_SLOTS = [
@@ -66,6 +67,46 @@ export default function Contact() {
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [bookedSlots, setBookedSlots] = useState([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+
+  useEffect(() => {
+    supabase.from('bookings').select('id').limit(1)
+  }, [])
+
+  useEffect(() => {
+    if (!form.date) return
+    const fetchBookedSlots = async () => {
+      setLoadingSlots(true)
+      setBookedSlots([])
+      try {
+        const startOfDay = `${form.date}T00:00:00`
+        const endOfDay = `${form.date}T23:59:59`
+        const { data } = await supabase
+          .from('bookings')
+          .select('date')
+          .gte('date', startOfDay)
+          .lte('date', endOfDay)
+
+        if (data) {
+          const booked = data.map(b => {
+            const d = new Date(b.date + (b.date.includes('T') ? '' : 'T00:00:00'))
+            const hours = d.getHours()
+            const minutes = d.getMinutes()
+            const period = hours >= 12 ? 'PM' : 'AM'
+            const displayHour = hours % 12 === 0 ? 12 : hours % 12
+            return `${displayHour}:${String(minutes).padStart(2, '0')} ${period}`
+          })
+          setBookedSlots(booked)
+        }
+      } catch (err) {
+        console.error('Failed to fetch booked slots:', err)
+      } finally {
+        setLoadingSlots(false)
+      }
+    }
+    fetchBookedSlots()
+  }, [form.date])
 
   const update = (field, value) => {
     if (field === 'date') {
@@ -73,6 +114,7 @@ export default function Contact() {
     } else {
       setForm(prev => ({ ...prev, [field]: value }))
     }
+    setError('')
   }
 
   const timeSlots = useMemo(() => {
@@ -93,7 +135,6 @@ export default function Contact() {
     const dateTime = toBostonISO(form.date, convertTime(form.time))
 
     try {
-      // Check if slot is already taken
       const { data: existing } = await supabase
         .from('bookings')
         .select('id')
@@ -214,17 +255,23 @@ export default function Contact() {
                 onChange={e => update('date', e.target.value)}
                 required
               />
+              {loadingSlots && <p className="loading-slots">Loading available times...</p>}
               <div className="time-grid">
-                {timeSlots.map(t => (
-                  <button
-                    key={t}
-                    type="button"
-                    className={`time-slot ${form.time === t ? 'selected' : ''}`}
-                    onClick={() => update('time', t)}
-                  >
-                    {t}
-                  </button>
-                ))}
+                {timeSlots.map(t => {
+                  const isBooked = bookedSlots.includes(t)
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`time-slot ${form.time === t ? 'selected' : ''} ${isBooked ? 'booked' : ''}`}
+                      onClick={() => !isBooked && update('time', t)}
+                      disabled={isBooked}
+                      title={isBooked ? 'This time slot is already taken. Please choose another one.' : ''}
+                    >
+                      {isBooked ? '✕' : t}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -235,7 +282,7 @@ export default function Contact() {
               <h3>Your Details</h3>
               <input
                 name="name"
-                placeholder="Your Full Name"
+                placeholder="Your Name"
                 value={form.name}
                 onChange={e => update('name', e.target.value)}
                 required

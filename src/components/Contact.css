@@ -172,6 +172,33 @@
   color: #fff;
 }
 
+.time-slot.booked {
+  background: #f5f0f0;
+  border-color: #e8d0d0;
+  color: #c4a0a0;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  font-size: 0.8rem;
+}
+
+.time-slot.booked:hover {
+  background: #f5f0f0;
+  border-color: #e8d0d0;
+}
+
+.loading-slots {
+  text-align: center;
+  color: #888;
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* Step Navigation */
 .step-buttons {
   display: flex;

@@ -8,6 +8,12 @@ router.post('/', async (req, res) => {
   if (!name || !phone || !service || !date) return res.status(400).json({ error: 'All fields required' })
 
   const db = await getDb()
+
+  const existing = db.exec(`SELECT id FROM bookings WHERE date = ? LIMIT 1`, [date])
+  if (existing.length && existing[0].values.length > 0) {
+    return res.status(409).json({ error: 'This time slot is already taken. Please choose another one.' })
+  }
+
   db.run(
     `INSERT INTO bookings (user_id, name, phone, service, date) VALUES (?, ?, ?, ?, ?)`,
     [null, name, phone, service, date]
