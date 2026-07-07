@@ -8,7 +8,7 @@ const services = [
   { icon: '🪒', name: 'Hot Towel Shave', price: '$45', desc: 'Traditional straight razor shave.' },
   { icon: '💈', name: 'Hair + Beard Combo', price: '$40', desc: 'Full grooming package.' },
   { icon: '👦', name: 'Kids Cut', price: '$25', desc: 'For the little ones, age 12 & under.' },
-  { icon: '📏', name: 'Line Up', price: '$30', desc: 'Crisp edges and clean hairline.' },
+  { icon: '📏', name: 'Line Up', price: '$20', desc: 'Crisp edges and clean hairline.' },
 ]
 
 export default function Services() {
