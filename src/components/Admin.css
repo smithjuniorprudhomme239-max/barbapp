@@ -453,9 +453,9 @@ tr:hover td { background: #fafafa; }
     gap: 1rem;
   }
 
-  .sidebar-brand { margin-bottom: 0; font-size: 1rem; flex: 1; }
+  .sidebar-brand { display: none; }
   .sidebar-nav { flex-direction: row; flex: none; }
-  .sidebar-logout { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+  .sidebar-logout { padding: 0.4rem 0.75rem; font-size: 0.8rem; margin-left: auto; }
 
   .admin-main { margin-left: 0; padding: 1rem; }
   .admin-topbar h1 { font-size: 1.2rem; }
