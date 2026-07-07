@@ -12,6 +12,7 @@ export default function Admin({ onLogout }) {
   const [deleting, setDeleting] = useState(false)
   const [now, setNow] = useState(new Date())
   const [filterToday, setFilterToday] = useState(false)
+  const [statusMenuId, setStatusMenuId] = useState(null)
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000)
@@ -54,19 +55,14 @@ export default function Admin({ onLogout }) {
     onLogout()
   }
 
-  const toggleStatus = async (booking) => {
-    const newStatus = booking.status === 'completed' ? 'pending' : 'completed'
+  const changeStatus = async (booking, newStatus) => {
     const { error } = await supabase
       .from('bookings')
       .update({ status: newStatus })
       .eq('id', booking.id)
-    if (error) {
-      console.error('Error updating status:', error)
-      return
-    }
-    setBookings(prev =>
-      prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b)
-    )
+    if (error) { console.error('Error updating status:', error); return }
+    setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b))
+    setStatusMenuId(null)
   }
 
   const handleDelete = async () => {
@@ -207,13 +203,19 @@ export default function Admin({ onLogout }) {
                       <td><span className="service-tag">{b.service}</span></td>
                       <td>{formatDate(b.date)}</td>
                       <td>{formatTime(b.date)}</td>
-                      <td>
+                      <td style={{ position: 'relative' }}>
                         <button
                           className={`status-btn ${b.status === 'completed' ? 'status-done' : 'status-pend'}`}
-                          onClick={() => toggleStatus(b)}
+                          onClick={() => setStatusMenuId(statusMenuId === b.id ? null : b.id)}
                         >
-                          {b.status === 'completed' ? 'Done' : 'Pending'}
+                          {b.status === 'completed' ? 'Done ▾' : 'Pending ▾'}
                         </button>
+                        {statusMenuId === b.id && (
+                          <div className="status-menu">
+                            <button className="status-menu-item status-opt-pending" onClick={() => changeStatus(b, 'pending')}>⏳ Pending</button>
+                            <button className="status-menu-item status-opt-done" onClick={() => changeStatus(b, 'completed')}>✅ Completed</button>
+                          </div>
+                        )}
                       </td>
                       <td>
                         <button

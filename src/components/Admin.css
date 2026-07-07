@@ -245,6 +245,37 @@ tr:hover td { background: #fafafa; }
 
 .status-pend:hover { background: #ffe0b2; }
 
+.status-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  z-index: 50;
+  min-width: 140px;
+  overflow: hidden;
+}
+
+.status-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.status-opt-pending { color: #e65100; }
+.status-opt-pending:hover { background: #fff3e0; }
+.status-opt-done { color: #2e7d32; }
+.status-opt-done:hover { background: #e8f5e9; }
+
 /* Delete button */
 .delete-btn {
   background: none;
