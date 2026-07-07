@@ -174,12 +174,13 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
-.table-scroll { overflow-x: auto; }
+.table-scroll { overflow-x: auto; overflow-y: visible; }
 
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.88rem;
+  overflow: visible;
 }
 
 th {
@@ -246,14 +247,12 @@ tr:hover td { background: #fafafa; }
 .status-pend:hover { background: #ffe0b2; }
 
 .status-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
+  position: fixed;
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  z-index: 50;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  z-index: 9999;
   min-width: 140px;
   overflow: hidden;
 }

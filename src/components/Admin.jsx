@@ -14,6 +14,7 @@ export default function Admin({ onLogout }) {
   const [filterToday, setFilterToday] = useState(false)
   const [filterPending, setFilterPending] = useState(false)
   const [statusMenuId, setStatusMenuId] = useState(null)
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000)
@@ -52,30 +53,28 @@ export default function Admin({ onLogout }) {
     fetchBookings()
   }, [])
 
+  useEffect(() => {
+    if (!statusMenuId) return
+    const close = () => setStatusMenuId(null)
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [statusMenuId])
+
   const handleBack = () => {
     onLogout()
   }
 
   const changeStatus = async (booking, newStatus) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token
-    if (!token) { alert('Not authenticated. Please log in again.'); return }
-
-    try {
-      const res = await fetch('http://localhost:5000/api/bookings/' + booking.id, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ status: newStatus })
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        alert('Failed to update: ' + (data.error || res.statusText))
-        return
-      }
-      setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b))
-      setStatusMenuId(null)
-    } catch (err) {
-      alert('Network error. Is the server running? ' + err.message)
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: newStatus })
+      .eq('id', booking.id)
+    if (error) {
+      console.error('Error updating status:', error)
+      return
     }
+    setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b))
+    setStatusMenuId(null)
   }
 
   const handleDelete = async () => {
@@ -221,15 +220,20 @@ export default function Admin({ onLogout }) {
                       <td><span className="service-tag">{b.service}</span></td>
                       <td>{formatDate(b.date)}</td>
                       <td>{formatTime(b.date)}</td>
-                      <td style={{ position: 'relative' }}>
+                      <td style={{ position: 'relative', overflow: 'visible' }}>
                         <button
                           className={`status-btn ${b.status === 'completed' ? 'status-done' : 'status-pend'}`}
-                          onClick={() => setStatusMenuId(statusMenuId === b.id ? null : b.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            setMenuPos({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX })
+                            setStatusMenuId(statusMenuId === b.id ? null : b.id)
+                          }}
                         >
                           {b.status === 'completed' ? 'Done ▾' : 'Pending ▾'}
                         </button>
                         {statusMenuId === b.id && (
-                          <div className="status-menu">
+                          <div className="status-menu" style={{ top: menuPos.top, left: menuPos.left, position: 'fixed' }}>
                             <button className="status-menu-item status-opt-pending" onClick={() => changeStatus(b, 'pending')}>⏳ Pending</button>
                             <button className="status-menu-item status-opt-done" onClick={() => changeStatus(b, 'completed')}>✅ Completed</button>
                           </div>
