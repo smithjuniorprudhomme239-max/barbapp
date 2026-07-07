@@ -11,6 +11,7 @@ export default function Admin({ onLogout }) {
   const [deleteId, setDeleteId] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [now, setNow] = useState(new Date())
+  const [filterToday, setFilterToday] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000)
@@ -87,13 +88,16 @@ export default function Admin({ onLogout }) {
   }
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return bookings
+    let list = filterToday
+      ? bookings.filter(b => (b.date || '').split('T')[0] === bostonTodayStr)
+      : bookings
+    if (!search.trim()) return list
     const q = search.toLowerCase()
-    return bookings.filter(b =>
+    return list.filter(b =>
       b.name?.toLowerCase().includes(q) ||
       b.service?.toLowerCase().includes(q)
     )
-  }, [bookings, search])
+  }, [bookings, search, filterToday, bostonTodayStr])
 
   const bostonTodayStr = new Intl.DateTimeFormat('en-CA', {
     timeZone: BOSTON_TZ,
@@ -148,11 +152,11 @@ export default function Admin({ onLogout }) {
               <p className="stat-label">Total Bookings</p>
             </div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card" onClick={() => setFilterToday(f => !f)} style={{ cursor: 'pointer', outline: filterToday ? '2px solid #2e7d32' : 'none' }}>
             <span className="stat-icon">🕐</span>
             <div>
               <p className="stat-value">{today}</p>
-              <p className="stat-label">Today</p>
+              <p className="stat-label">{filterToday ? 'Today ✕' : 'Today'}</p>
             </div>
           </div>
           <div className="stat-card">
@@ -166,7 +170,7 @@ export default function Admin({ onLogout }) {
 
         <div className="admin-table-wrap">
           <div className="table-header">
-            <h2>All Bookings</h2>
+            <h2>{filterToday ? "Today's Bookings" : 'All Bookings'}</h2>
             <input
               className="search-input"
               type="text"
