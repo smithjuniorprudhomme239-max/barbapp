@@ -61,7 +61,11 @@ export default function Admin({ onLogout }) {
       }
     }
     document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
+    document.addEventListener('touchstart', close)
+    return () => {
+      document.removeEventListener('mousedown', close)
+      document.removeEventListener('touchstart', close)
+    }
   }, [statusMenuId])
 
   const handleBack = () => {
@@ -230,7 +234,11 @@ export default function Admin({ onLogout }) {
                           onClick={(e) => {
                             e.stopPropagation()
                             const rect = e.currentTarget.getBoundingClientRect()
-                            setMenuPos({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX })
+                            const menuWidth = 150
+                            const left = rect.left + menuWidth > window.innerWidth
+                              ? window.innerWidth - menuWidth - 8
+                              : rect.left
+                            setMenuPos({ top: rect.bottom + 4, left })
                             setStatusMenuId(statusMenuId === b.id ? null : b.id)
                           }}
                         >
