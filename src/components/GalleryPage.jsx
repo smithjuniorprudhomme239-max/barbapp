@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './Gallery.css'
+import './GalleryPage.css'
 
 const photos = [
   { src: 'https://i.postimg.cc/8cyqL4xQ/b4d3697f32db8.png', alt: 'Precision fade haircut' },
@@ -10,9 +11,22 @@ const photos = [
   { src: 'https://i.postimg.cc/W3cB6h3y/8d096ebb6ebf38.png', alt: 'Stylish haircut' },
   { src: 'https://i.postimg.cc/RV6mT4Tp/image1.png', alt: 'Barber masterpiece' },
   { src: 'https://i.postimg.cc/zBrMT1fY/image-2.png', alt: 'Barber masterpiece 2' },
+  { src: 'https://i.postimg.cc/nLHSLGSJ/image-3.png', alt: 'Barber masterpiece 3' },
+  { src: 'https://i.postimg.cc/FHhwfv75/image4.png', alt: 'Barber masterpiece 4' },
+  { src: 'https://i.postimg.cc/W3mMqBdf/image5.png', alt: 'Barber masterpiece 5' },
+  { src: 'https://i.postimg.cc/tJSnhpp2/image6.png', alt: 'Barber masterpiece 6' },
+  { src: 'https://i.postimg.cc/RhyVSFMJ/image7.png', alt: 'Barber masterpiece 7' },
+  { src: 'https://i.postimg.cc/1R29N8QS/image8.png', alt: 'Barber masterpiece 8' },
+  { src: 'https://i.postimg.cc/mhWfpFLN/image9.png', alt: 'Barber masterpiece 9' },
+  { src: 'https://i.postimg.cc/ZKP5tJGt/im1.png', alt: 'Barber masterpiece 10' },
+  { src: 'https://i.postimg.cc/fTsMv6JP/im2.png', alt: 'Barber masterpiece 11' },
+  { src: 'https://i.postimg.cc/T294ZStn/im3.png', alt: 'Barber masterpiece 12' },
+  { src: 'https://i.postimg.cc/vTNLGWg7/im4.png', alt: 'Barber masterpiece 13' },
+  { src: 'https://i.postimg.cc/YCwLYnHK/im6.png', alt: 'Barber masterpiece 14' },
+  { src: 'https://i.postimg.cc/ncq1QSW9/im7.png', alt: 'Barber masterpiece 15' },
 ]
 
-export default function Gallery({ onViewMore }) {
+export default function GalleryPage({ onBack }) {
   const [selectedIndex, setSelectedIndex] = useState(null)
 
   const openLightbox = (index) => {
@@ -36,30 +50,29 @@ export default function Gallery({ onViewMore }) {
   }
 
   return (
-    <section id="gallery" className="section gallery">
-      <div className="gallery-header">
-        <span className="gallery-label">OUR WORK</span>
-        <h2>Gallery</h2>
-        <p className="gallery-subtitle">See the craftsmanship behind every cut</p>
+    <div className="gallery-page">
+      <div className="gallery-page-header">
+        <button className="gallery-back-btn" onClick={onBack}>← Back</button>
+        <div>
+          <span className="gallery-label">OUR WORK</span>
+          <h1>Full Gallery</h1>
+          <p className="gallery-subtitle">Every cut tells a story</p>
+        </div>
       </div>
 
-      <div className="gallery-grid">
+      <div className="gallery-grid gallery-page-grid">
         {photos.map((photo, i) => (
           <div
             key={i}
             className={`gallery-item ${i === 0 || i === 3 ? 'tall' : ''}`}
             onClick={() => openLightbox(i)}
           >
-            <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" fetchpriority="low" />
+            <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" />
             <div className="gallery-overlay">
               <span className="gallery-zoom">🔍</span>
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="gallery-view-more">
-        <button className="view-more-btn" onClick={onViewMore}>View More ↓</button>
       </div>
 
       {selectedIndex !== null && (
@@ -73,6 +86,6 @@ export default function Gallery({ onViewMore }) {
           <button className="lightbox-nav lightbox-next" onClick={goNext}>›</button>
         </div>
       )}
-    </section>
+    </div>
   )
 }
