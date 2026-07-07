@@ -34,11 +34,13 @@
               registration.update();
             }, 1000 * 60 * 60);
           });
-      } else if ('serviceWorker' in navigator) {
+      } else if ('serviceWorker' in navigator && !sessionStorage.getItem('sw-unregistered')) {
         navigator.serviceWorker.getRegistration('/sw.js').then(registration => {
           if (registration) {
-            registration.unregister();
-            window.location.reload();
+            registration.unregister().then(() => {
+              sessionStorage.setItem('sw-unregistered', '1');
+              window.location.reload();
+            });
           }
         });
       }
