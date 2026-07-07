@@ -15,6 +15,11 @@ export default function Admin({ onLogout }) {
   const [filterPending, setFilterPending] = useState(false)
   const [statusMenuId, setStatusMenuId] = useState(null)
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
+  const [activeTab, setActiveTab] = useState('bookings')
+  const [daysOff, setDaysOff] = useState([])
+  const [dayOffDate, setDayOffDate] = useState('')
+  const [addingDayOff, setAddingDayOff] = useState(false)
+  const [dayOffError, setDayOffError] = useState('')
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000)
@@ -49,8 +54,22 @@ export default function Admin({ onLogout }) {
     }
   }
 
+  const fetchDaysOff = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('days_off')
+        .select('*')
+        .order('date', { ascending: true })
+      if (error) throw error
+      setDaysOff(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Error fetching days off:', error)
+    }
+  }
+
   useEffect(() => {
     fetchBookings()
+    fetchDaysOff()
   }, [])
 
   useEffect(() => {
@@ -103,6 +122,53 @@ export default function Admin({ onLogout }) {
     setDeleteId(null)
   }
 
+  const handleAddDayOff = async () => {
+    if (!dayOffDate) {
+      setDayOffError('Please select a date.')
+      return
+    }
+    setDayOffError('')
+    setAddingDayOff(true)
+    try {
+      const { data: existing } = await supabase
+        .from('days_off')
+        .select('id')
+        .eq('date', dayOffDate)
+        .limit(1)
+      if (existing && existing.length > 0) {
+        setDayOffError('This date is already marked as day off.')
+        setAddingDayOff(false)
+        return
+      }
+      const { data, error } = await supabase
+        .from('days_off')
+        .insert([{ date: dayOffDate }])
+        .select()
+      if (error) throw error
+      if (data) {
+        setDaysOff(prev => [...prev, ...data].sort((a, b) => a.date.localeCompare(b.date)))
+      }
+      setDayOffDate('')
+    } catch (error) {
+      console.error('Error adding day off:', error)
+      setDayOffError('Failed to add day off.')
+    } finally {
+      setAddingDayOff(false)
+    }
+  }
+
+  const handleRemoveDayOff = async (id) => {
+    const { error } = await supabase
+      .from('days_off')
+      .delete()
+      .eq('id', id)
+    if (error) {
+      console.error('Error removing day off:', error)
+      return
+    }
+    setDaysOff(prev => prev.filter(d => d.id !== id))
+  }
+
   const bostonTodayStr = new Intl.DateTimeFormat('en-CA', {
     timeZone: BOSTON_TZ,
     year: 'numeric', month: '2-digit', day: '2-digit'
@@ -145,12 +211,25 @@ export default function Admin({ onLogout }) {
     return `${displayHour}:${String(min).padStart(2, '0')} ${period}`
   }
 
+  const formatDayOffDate = (dateStr) => {
+    const [y, m, d] = dateStr.split('-').map(Number)
+    const date = new Date(y, m - 1, d)
+    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+  }
+
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="sidebar-brand">✂ Duckens</div>
         <nav className="sidebar-nav">
-          <span className="sidebar-link active">📋 Bookings</span>
+          <span
+            className={`sidebar-link ${activeTab === 'bookings' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bookings')}
+          >📋 Bookings</span>
+          <span
+            className={`sidebar-link ${activeTab === 'daysOff' ? 'active' : ''}`}
+            onClick={() => setActiveTab('daysOff')}
+          >🏖 Days Off</span>
         </nav>
         <button className="sidebar-logout" onClick={handleBack}>← Back</button>
       </aside>
@@ -158,109 +237,174 @@ export default function Admin({ onLogout }) {
       <main className="admin-main">
         <div className="admin-topbar">
           <div>
-            <h1>Dashboard</h1>
+            <h1>{activeTab === 'daysOff' ? 'Days Off' : 'Dashboard'}</h1>
             <span className="topbar-clock">{bostonTime}</span>
           </div>
           <span className="admin-badge">👤 admin</span>
         </div>
 
-        <div className="admin-stats">
-          <div className="stat-card" onClick={() => { setFilterToday(false); setFilterPending(false) }} style={{ cursor: 'pointer' }}>
-            <span className="stat-icon">📅</span>
-            <div>
-              <p className="stat-value">{bookings.length}</p>
-              <p className="stat-label">Total Bookings</p>
+        {activeTab === 'bookings' ? (
+          <>
+            <div className="admin-stats">
+              <div className="stat-card" onClick={() => { setFilterToday(false); setFilterPending(false) }} style={{ cursor: 'pointer' }}>
+                <span className="stat-icon">📅</span>
+                <div>
+                  <p className="stat-value">{bookings.length}</p>
+                  <p className="stat-label">Total Bookings</p>
+                </div>
+              </div>
+              <div className="stat-card" onClick={() => { setFilterToday(f => !f); setFilterPending(false) }} style={{ cursor: 'pointer', outline: filterToday && !filterPending ? '2px solid #2e7d32' : 'none' }}>
+                <span className="stat-icon">🕐</span>
+                <div>
+                  <p className="stat-value">{today}</p>
+                  <p className="stat-label">{filterToday && !filterPending ? 'Today ✕' : 'Today'}</p>
+                </div>
+              </div>
+              <div className="stat-card" onClick={() => setFilterPending(f => !f)} style={{ cursor: 'pointer', outline: filterPending ? '2px solid #e65100' : 'none' }}>
+                <span className="stat-icon">⏳</span>
+                <div>
+                  <p className="stat-value">{pendingCount}</p>
+                  <p className="stat-label">{filterPending ? 'Pending ✕' : 'Pending'}</p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="stat-card" onClick={() => { setFilterToday(f => !f); setFilterPending(false) }} style={{ cursor: 'pointer', outline: filterToday && !filterPending ? '2px solid #2e7d32' : 'none' }}>
-            <span className="stat-icon">🕐</span>
-            <div>
-              <p className="stat-value">{today}</p>
-              <p className="stat-label">{filterToday && !filterPending ? 'Today ✕' : 'Today'}</p>
-            </div>
-          </div>
-          <div className="stat-card" onClick={() => setFilterPending(f => !f)} style={{ cursor: 'pointer', outline: filterPending ? '2px solid #e65100' : 'none' }}>
-            <span className="stat-icon">⏳</span>
-            <div>
-              <p className="stat-value">{pendingCount}</p>
-              <p className="stat-label">{filterPending ? 'Pending ✕' : 'Pending'}</p>
-            </div>
-          </div>
-        </div>
 
-        <div className="admin-table-wrap">
-          <div className="table-header">
-            <h2>{filterToday ? "Today's Bookings" : 'All Bookings'}</h2>
-            <input
-              className="search-input"
-              type="text"
-              placeholder="🔍 Search bookings..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
+            <div className="admin-table-wrap">
+              <div className="table-header">
+                <h2>{filterToday ? "Today's Bookings" : 'All Bookings'}</h2>
+                <input
+                  className="search-input"
+                  type="text"
+                  placeholder="🔍 Search bookings..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
 
-          {loading ? (
-            <p className="no-bookings">Loading...</p>
-          ) : filtered.length === 0 ? (
-            <p className="no-bookings">{search ? 'No matching bookings.' : 'No bookings yet.'}</p>
-          ) : (
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Service</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((b, i) => (
-                    <tr key={b.id} className={b.status === 'completed' ? 'row-completed' : ''}>
-                      <td>{i + 1}</td>
-                      <td className="td-name">{b.name}</td>
-                      <td>{b.phone}</td>
-                      <td><span className="service-tag">{b.service}</span></td>
-                      <td>{formatDate(b.date)}</td>
-                      <td>{formatTime(b.date)}</td>
-                      <td style={{ position: 'relative', overflow: 'visible' }}>
-                        <button
-                          className={`status-btn ${b.status === 'completed' ? 'status-done' : 'status-pend'}`}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            const rect = e.currentTarget.getBoundingClientRect()
-                            const menuWidth = 150
-                            const left = rect.left + menuWidth > window.innerWidth
-                              ? window.innerWidth - menuWidth - 8
-                              : rect.left
-                            setMenuPos({ top: rect.bottom + 4, left })
-                            setStatusMenuId(statusMenuId === b.id ? null : b.id)
-                          }}
-                        >
-                          {b.status === 'completed' ? 'Done ▾' : 'Pending ▾'}
-                        </button>
-                      </td>
-                      <td>
-                        <button
-                          className="delete-btn"
-                          onClick={() => setDeleteId(b.id)}
-                          title="Delete booking"
-                        >
-                          🗑
-                        </button>
-                      </td>
+              {loading ? (
+                <p className="no-bookings">Loading...</p>
+              ) : filtered.length === 0 ? (
+                <p className="no-bookings">{search ? 'No matching bookings.' : 'No bookings yet.'}</p>
+              ) : (
+                <div className="table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((b, i) => (
+                        <tr key={b.id} className={b.status === 'completed' ? 'row-completed' : ''}>
+                          <td>{i + 1}</td>
+                          <td className="td-name">{b.name}</td>
+                          <td><a href={`tel:${b.phone}`} className="phone-link" title={`Call ${b.phone}`}><span className="phone-icon">📞</span> {b.phone}</a></td>
+                          <td><span className="service-tag">{b.service}</span></td>
+                          <td>{formatDate(b.date)}</td>
+                          <td>{formatTime(b.date)}</td>
+                          <td style={{ position: 'relative', overflow: 'visible' }}>
+                            <button
+                              className={`status-btn ${b.status === 'completed' ? 'status-done' : 'status-pend'}`}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                const menuWidth = 150
+                                const left = rect.left + menuWidth > window.innerWidth
+                                  ? window.innerWidth - menuWidth - 8
+                                  : rect.left
+                                setMenuPos({ top: rect.bottom + 4, left })
+                                setStatusMenuId(statusMenuId === b.id ? null : b.id)
+                              }}
+                            >
+                              {b.status === 'completed' ? 'Done ▾' : 'Pending ▾'}
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              className="delete-btn"
+                              onClick={() => setDeleteId(b.id)}
+                              title="Delete booking"
+                            >
+                              🗑
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="admin-table-wrap">
+            <div className="table-header">
+              <h2>Manage Days Off</h2>
+            </div>
+
+            <div className="dayoff-add">
+              <div className="dayoff-input-group">
+                <input
+                  type="date"
+                  className="dayoff-date-input"
+                  value={dayOffDate}
+                  min={bostonTodayStr}
+                  onChange={e => { setDayOffDate(e.target.value); setDayOffError('') }}
+                />
+                <button
+                  className="dayoff-add-btn"
+                  onClick={handleAddDayOff}
+                  disabled={addingDayOff || !dayOffDate}
+                >
+                  {addingDayOff ? 'Adding...' : '+ Add Day Off'}
+                </button>
+              </div>
+              {dayOffError && <p className="dayoff-error">{dayOffError}</p>}
+            </div>
+
+            {daysOff.length === 0 ? (
+              <p className="no-bookings">No days off scheduled.</p>
+            ) : (
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Date</th>
+                      <th>Day</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                  </thead>
+                  <tbody>
+                    {daysOff.map((d, i) => (
+                      <tr key={d.id}>
+                        <td>{i + 1}</td>
+                        <td className="td-name">{d.date}</td>
+                        <td>{formatDayOffDate(d.date)}</td>
+                        <td>
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleRemoveDayOff(d.id)}
+                            title="Remove day off"
+                          >
+                            🗑
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {statusMenuId && (() => {

@@ -205,6 +205,23 @@ td {
 
 .td-name { font-weight: 600; }
 
+.phone-link {
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.phone-icon {
+  font-size: 0.9rem;
+}
+
+.phone-link:hover {
+  color: #1b5e20;
+  text-decoration: underline;
+}
+
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #fafafa; }
 
@@ -260,14 +277,15 @@ tr:hover td { background: #fafafa; }
 .status-menu-item {
   display: block;
   width: 100%;
-  padding: 0.6rem 1rem;
+  padding: 0.75rem 1rem;
   background: none;
   border: none;
   text-align: left;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
+  min-height: 44px;
 }
 
 .status-opt-pending { color: #e65100; }
@@ -365,6 +383,61 @@ tr:hover td { background: #fafafa; }
   text-align: center;
   padding: 3rem 0;
   font-size: 0.95rem;
+}
+
+/* Days Off */
+.dayoff-add {
+  margin-bottom: 1.5rem;
+}
+
+.dayoff-input-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dayoff-date-input {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 200px;
+}
+
+.dayoff-date-input:focus {
+  border-color: #2e7d32;
+}
+
+.dayoff-add-btn {
+  padding: 0.55rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-height: 44px;
+}
+
+.dayoff-add-btn:hover {
+  background: #1b5e20;
+}
+
+.dayoff-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dayoff-error {
+  color: #d32f2f;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
 }
 
 /* Mobile */

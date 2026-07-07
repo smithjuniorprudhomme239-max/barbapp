@@ -90,6 +90,7 @@ export default function Contact() {
   const [submitting, setSubmitting] = useState(false)
   const [bookedSlots, setBookedSlots] = useState([])
   const [loadingSlots, setLoadingSlots] = useState(false)
+  const [isDayOff, setIsDayOff] = useState(false)
 
   useEffect(() => {
     supabase.from('bookings').select('id').limit(1)
@@ -100,7 +101,19 @@ export default function Contact() {
     const fetchBookedSlots = async () => {
       setLoadingSlots(true)
       setBookedSlots([])
+      setIsDayOff(false)
       try {
+        const { data: dayOffData } = await supabase
+          .from('days_off')
+          .select('id')
+          .eq('date', form.date)
+          .limit(1)
+        if (dayOffData && dayOffData.length > 0) {
+          setIsDayOff(true)
+          setLoadingSlots(false)
+          return
+        }
+
         const startOfDay = toBostonISO(form.date, '00:00:00')
         const endOfDay = toBostonISO(form.date, '23:59:00')
         const { data } = await supabase
@@ -111,7 +124,6 @@ export default function Contact() {
 
         if (data) {
           const booked = data.map(b => {
-            // Parse time directly from the ISO string to avoid browser timezone differences
             const timePart = b.date.split('T')[1] || ''
             const [hStr, mStr] = timePart.split(':')
             const hours = parseInt(hStr, 10)
@@ -284,9 +296,12 @@ export default function Contact() {
                 required
               />
               {loadingSlots && <p className="loading-slots">Loading available times...</p>}
+              {!loadingSlots && isDayOff && (
+                <p className="dayoff-notice">🏖 This day is marked as a day off. No appointments available. Please choose another date.</p>
+              )}
               <div className="time-grid">
                 {timeSlots.map(t => {
-                  const isBooked = bookedSlots.includes(t)
+                  const isBooked = isDayOff || bookedSlots.includes(t)
                   return (
                     <button
                       key={t}
@@ -294,7 +309,7 @@ export default function Contact() {
                       className={`time-slot ${form.time === t ? 'selected' : ''} ${isBooked ? 'booked' : ''}`}
                       onClick={() => !isBooked && update('time', t)}
                       disabled={isBooked}
-                      title={isBooked ? 'This time slot is already taken. Please choose another one.' : ''}
+                      title={isBooked ? (isDayOff ? 'The shop is closed on this day.' : 'This time slot is already taken. Please choose another one.') : ''}
                     >
                       {t}
                     </button>
