@@ -87,6 +87,11 @@ export default function Admin({ onLogout }) {
     setDeleteId(null)
   }
 
+  const bostonTodayStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: BOSTON_TZ,
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date())
+
   const filtered = useMemo(() => {
     let list = filterToday
       ? bookings.filter(b => (b.date || '').split('T')[0] === bostonTodayStr)
@@ -99,10 +104,6 @@ export default function Admin({ onLogout }) {
     )
   }, [bookings, search, filterToday, bostonTodayStr])
 
-  const bostonTodayStr = new Intl.DateTimeFormat('en-CA', {
-    timeZone: BOSTON_TZ,
-    year: 'numeric', month: '2-digit', day: '2-digit'
-  }).format(new Date())
   const today = bookings.filter(b => {
     const [datePart] = (b.date || '').split('T')
     return datePart === bostonTodayStr
