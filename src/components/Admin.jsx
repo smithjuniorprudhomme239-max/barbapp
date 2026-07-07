@@ -55,9 +55,13 @@ export default function Admin({ onLogout }) {
 
   useEffect(() => {
     if (!statusMenuId) return
-    const close = () => setStatusMenuId(null)
-    document.addEventListener('click', close)
-    return () => document.removeEventListener('click', close)
+    const close = (e) => {
+      if (!e.target.closest('.status-menu') && !e.target.closest('.status-btn')) {
+        setStatusMenuId(null)
+      }
+    }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
   }, [statusMenuId])
 
   const handleBack = () => {
@@ -232,12 +236,6 @@ export default function Admin({ onLogout }) {
                         >
                           {b.status === 'completed' ? 'Done ▾' : 'Pending ▾'}
                         </button>
-                        {statusMenuId === b.id && (
-                          <div className="status-menu" style={{ top: menuPos.top, left: menuPos.left, position: 'fixed' }}>
-                            <button className="status-menu-item status-opt-pending" onClick={() => changeStatus(b, 'pending')}>⏳ Pending</button>
-                            <button className="status-menu-item status-opt-done" onClick={() => changeStatus(b, 'completed')}>✅ Completed</button>
-                          </div>
-                        )}
                       </td>
                       <td>
                         <button
@@ -256,6 +254,17 @@ export default function Admin({ onLogout }) {
           )}
         </div>
       </main>
+
+      {statusMenuId && (() => {
+        const booking = filtered.find(b => b.id === statusMenuId)
+        if (!booking) return null
+        return (
+          <div className="status-menu" style={{ top: menuPos.top, left: menuPos.left }}>
+            <button className="status-menu-item status-opt-pending" onMouseDown={(e) => { e.stopPropagation(); changeStatus(booking, 'pending') }}>⏳ Pending</button>
+            <button className="status-menu-item status-opt-done" onMouseDown={(e) => { e.stopPropagation(); changeStatus(booking, 'completed') }}>✅ Completed</button>
+          </div>
+        )
+      })()}
 
       {deleteId && (
         <div className="modal-overlay" onClick={() => setDeleteId(null)}>
