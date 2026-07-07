@@ -84,7 +84,7 @@ function isSunday(dateStr) {
 
 export default function Contact() {
   const [step, setStep] = useState(1)
-  const [form, setForm] = useState({ name: '', date: getBostonToday(), time: '', service: '' })
+  const [form, setForm] = useState({ name: '', phone: '', date: getBostonToday(), time: '', service: '' })
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -147,6 +147,8 @@ export default function Contact() {
   const canNext = () => {
     if (step === 1) return form.service !== ''
     if (step === 2) return form.date !== '' && form.time !== ''
+    if (step === 3) return form.name.trim() !== ''
+    if (step === 4) return form.phone.trim() !== ''
     return true
   }
 
@@ -174,6 +176,7 @@ export default function Contact() {
         .from('bookings')
         .insert([{
           name: form.name,
+          phone: form.phone,
           service: form.service,
           date: dateTime
         }])
@@ -203,7 +206,7 @@ export default function Contact() {
 
   const resetForm = () => {
     setSent(false)
-    setForm({ name: '', date: getBostonToday(), time: '', service: '' })
+    setForm({ name: '', phone: '', date: getBostonToday(), time: '', service: '' })
     setStep(1)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -242,6 +245,8 @@ export default function Contact() {
           <span className={`step-dot ${step >= 2 ? 'active' : ''}`}>2</span>
           <span className={`step-line ${step >= 3 ? 'active' : ''}`} />
           <span className={`step-dot ${step >= 3 ? 'active' : ''}`}>3</span>
+          <span className={`step-line ${step >= 4 ? 'active' : ''}`} />
+          <span className={`step-dot ${step >= 4 ? 'active' : ''}`}>4</span>
         </div>
 
         <form onSubmit={submit} className="booking-form">
@@ -299,15 +304,31 @@ export default function Contact() {
             </div>
           )}
 
-          {/* Step 3: Your Info */}
+          {/* Step 3: Your Name */}
           {step === 3 && (
             <div className="step-content">
-              <h3>Your Details</h3>
+              <h3>Your Name</h3>
               <input
                 name="name"
                 placeholder="Your Name"
                 value={form.name}
                 onChange={e => update('name', e.target.value)}
+                required
+              />
+              {error && <p className="form-error">{error}</p>}
+            </div>
+          )}
+
+          {/* Step 4: Phone Number */}
+          {step === 4 && (
+            <div className="step-content">
+              <h3>Your Phone Number</h3>
+              <input
+                name="phone"
+                type="tel"
+                placeholder="e.g. (617) 555-1234"
+                value={form.phone}
+                onChange={e => update('phone', e.target.value)}
                 required
               />
               {error && <p className="form-error">{error}</p>}
@@ -321,7 +342,7 @@ export default function Contact() {
                 ← Back
               </button>
             )}
-            {step < 3 ? (
+            {step < 4 ? (
               <button type="button" className="btn-next" onClick={() => canNext() && setStep(step + 1)} disabled={!canNext()}>
                 Continue →
               </button>
