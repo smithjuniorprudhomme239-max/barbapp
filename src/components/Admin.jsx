@@ -12,6 +12,7 @@ export default function Admin({ onLogout }) {
   const [deleting, setDeleting] = useState(false)
   const [now, setNow] = useState(new Date())
   const [filterToday, setFilterToday] = useState(false)
+  const [filterPending, setFilterPending] = useState(false)
   const [statusMenuId, setStatusMenuId] = useState(null)
 
   useEffect(() => {
@@ -56,13 +57,25 @@ export default function Admin({ onLogout }) {
   }
 
   const changeStatus = async (booking, newStatus) => {
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status: newStatus })
-      .eq('id', booking.id)
-    if (error) { console.error('Error updating status:', error); return }
-    setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b))
-    setStatusMenuId(null)
+    const token = (await supabase.auth.getSession()).data.session?.access_token
+    if (!token) { alert('Not authenticated. Please log in again.'); return }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/bookings/' + booking.id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ status: newStatus })
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        alert('Failed to update: ' + (data.error || res.statusText))
+        return
+      }
+      setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b))
+      setStatusMenuId(null)
+    } catch (err) {
+      alert('Network error. Is the server running? ' + err.message)
+    }
   }
 
   const handleDelete = async () => {
@@ -92,13 +105,16 @@ export default function Admin({ onLogout }) {
     let list = filterToday
       ? bookings.filter(b => (b.date || '').split('T')[0] === bostonTodayStr)
       : bookings
+    if (filterPending) {
+      list = list.filter(b => b.status === 'pending' || !b.status)
+    }
     if (!search.trim()) return list
     const q = search.toLowerCase()
     return list.filter(b =>
       b.name?.toLowerCase().includes(q) ||
       b.service?.toLowerCase().includes(q)
     )
-  }, [bookings, search, filterToday, bostonTodayStr])
+  }, [bookings, search, filterToday, filterPending, bostonTodayStr])
 
   const today = bookings.filter(b => {
     const [datePart] = (b.date || '').split('T')
@@ -142,25 +158,25 @@ export default function Admin({ onLogout }) {
         </div>
 
         <div className="admin-stats">
-          <div className="stat-card">
+          <div className="stat-card" onClick={() => { setFilterToday(false); setFilterPending(false) }} style={{ cursor: 'pointer' }}>
             <span className="stat-icon">📅</span>
             <div>
               <p className="stat-value">{bookings.length}</p>
               <p className="stat-label">Total Bookings</p>
             </div>
           </div>
-          <div className="stat-card" onClick={() => setFilterToday(f => !f)} style={{ cursor: 'pointer', outline: filterToday ? '2px solid #2e7d32' : 'none' }}>
+          <div className="stat-card" onClick={() => { setFilterToday(f => !f); setFilterPending(false) }} style={{ cursor: 'pointer', outline: filterToday && !filterPending ? '2px solid #2e7d32' : 'none' }}>
             <span className="stat-icon">🕐</span>
             <div>
               <p className="stat-value">{today}</p>
-              <p className="stat-label">{filterToday ? 'Today ✕' : 'Today'}</p>
+              <p className="stat-label">{filterToday && !filterPending ? 'Today ✕' : 'Today'}</p>
             </div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card" onClick={() => setFilterPending(f => !f)} style={{ cursor: 'pointer', outline: filterPending ? '2px solid #e65100' : 'none' }}>
             <span className="stat-icon">⏳</span>
             <div>
               <p className="stat-value">{pendingCount}</p>
-              <p className="stat-label">Pending</p>
+              <p className="stat-label">{filterPending ? 'Pending ✕' : 'Pending'}</p>
             </div>
           </div>
         </div>
@@ -201,7 +217,7 @@ export default function Admin({ onLogout }) {
                     <tr key={b.id} className={b.status === 'completed' ? 'row-completed' : ''}>
                       <td>{i + 1}</td>
                       <td className="td-name">{b.name}</td>
-                      <td>{b.phone || '—'}</td>
+                      <td>{b.phone}</td>
                       <td><span className="service-tag">{b.service}</span></td>
                       <td>{formatDate(b.date)}</td>
                       <td>{formatTime(b.date)}</td>

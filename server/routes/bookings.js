@@ -1,6 +1,12 @@
 const router = require('express').Router()
 const { getDb, save } = require('../db')
 const { authMiddleware, adminMiddleware } = require('../middleware')
+const { createClient } = require('@supabase/supabase-js')
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
 // Create a booking - PUBLIC (anyone can book without login)
 router.post('/', async (req, res) => {
@@ -36,6 +42,28 @@ router.get('/', adminMiddleware, async (req, res) => {
     Object.fromEntries(cols.map((col, i) => [col, row[i]]))
   )
   res.json(bookings)
+})
+
+// Update booking status - uses Supabase service role to bypass RLS
+router.patch('/:id', async (req, res) => {
+  const { id } = req.params
+  const { status } = req.body
+
+  if (!status || !['pending', 'completed'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status. Must be pending or completed.' })
+  }
+
+  const { error } = await supabaseAdmin
+    .from('bookings')
+    .update({ status })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Supabase update error:', error)
+    return res.status(500).json({ error: error.message })
+  }
+
+  res.json({ message: 'Status updated', id, status })
 })
 
 module.exports = router
