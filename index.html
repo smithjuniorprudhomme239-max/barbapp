@@ -17,8 +17,30 @@
   <body>
     <div id="root"></div>
     <script>
-      if ('serviceWorker' in navigator) {
+      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  if (confirm('A new version is available! Refresh to update?')) {
+                    window.location.reload(true);
+                  }
+                }
+              });
+            });
+            setInterval(() => {
+              registration.update();
+            }, 1000 * 60 * 60);
+          });
+      } else if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration('/sw.js').then(registration => {
+          if (registration) {
+            registration.unregister();
+            window.location.reload();
+          }
+        });
       }
     </script>
     <script type="module" src="/src/main.jsx"></script>

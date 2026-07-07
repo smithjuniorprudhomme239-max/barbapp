@@ -38,7 +38,28 @@ function toBostonISO(dateStr, timeStr) {
   const H = String(h).padStart(2, '0')
   const MN = String(min).padStart(2, '0')
 
-  return `${Y}-${M}-${D}T${H}:${MN}:00`
+  const utcDate = new Date(Date.UTC(y, m - 1, d, h, min, 0))
+  const bostonParts = new Intl.DateTimeFormat('en-US', {
+    timeZone: BOSTON_TZ,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(utcDate)
+
+  const bostonHour = parseInt(bostonParts.find(p => p.type === 'hour').value)
+  const bostonMinute = parseInt(bostonParts.find(p => p.type === 'minute').value)
+
+  const inputMinutes = h * 60 + min
+  const bostonMinutes = bostonHour * 60 + bostonMinute
+  let offsetMinutes = bostonMinutes - inputMinutes
+  if (offsetMinutes > 720) offsetMinutes -= 1440
+  if (offsetMinutes < -720) offsetMinutes += 1440
+
+  const offsetSign = offsetMinutes >= 0 ? '+' : '-'
+  const absOffset = Math.abs(offsetMinutes)
+  const offsetH = String(Math.floor(absOffset / 60)).padStart(2, '0')
+  const offsetM = String(absOffset % 60).padStart(2, '0')
+
+  return `${Y}-${M}-${D}T${H}:${MN}:00${offsetSign}${offsetH}:${offsetM}`
 }
 
 function getBostonToday() {
@@ -80,8 +101,8 @@ export default function Contact() {
       setLoadingSlots(true)
       setBookedSlots([])
       try {
-        const startOfDay = `${form.date}T00:00:00`
-        const endOfDay = `${form.date}T23:59:59`
+        const startOfDay = toBostonISO(form.date, '00:00:00')
+        const endOfDay = toBostonISO(form.date, '23:59:00')
         const { data } = await supabase
           .from('bookings')
           .select('date')
@@ -268,7 +289,7 @@ export default function Contact() {
                       disabled={isBooked}
                       title={isBooked ? 'This time slot is already taken. Please choose another one.' : ''}
                     >
-                      {isBooked ? '✕' : t}
+                      {t}
                     </button>
                   )
                 })}

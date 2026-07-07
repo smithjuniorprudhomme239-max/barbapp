@@ -114,7 +114,8 @@ export default function Admin({ onLogout }) {
 
   const formatTime = (dateStr) => {
     const [, timePart] = (dateStr || '').split('T')
-    const [h, min] = (timePart || '0:0').split(':').map(Number)
+    const cleanTime = (timePart || '').replace(/[+-]\d{2}:\d{2}$/, '')
+    const [h, min] = (cleanTime || '0:0').split(':').map(Number)
     const period = h >= 12 ? 'PM' : 'AM'
     const displayHour = h === 0 ? 12 : h > 12 ? h - 12 : h
     return `${displayHour}:${String(min).padStart(2, '0')} ${period}`

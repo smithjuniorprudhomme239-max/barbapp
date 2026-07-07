@@ -173,17 +173,36 @@
 }
 
 .time-slot.booked {
-  background: #f5f0f0;
-  border-color: #e8d0d0;
-  color: #c4a0a0;
+  background: #fff0f0;
+  border-color: #e04040;
+  color: #cc0000;
   cursor: not-allowed;
+  font-weight: 600;
+  font-size: 0.72rem;
+  opacity: 0.9;
+  pointer-events: none;
+  position: relative;
+  overflow: hidden;
   text-decoration: line-through;
-  font-size: 0.8rem;
+  text-decoration-color: #cc0000;
+  text-decoration-thickness: 2px;
+}
+
+.time-slot.booked::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  width: 120%;
+  height: 2px;
+  background: #e04040;
+  transform: rotate(-12deg);
+  pointer-events: none;
 }
 
 .time-slot.booked:hover {
-  background: #f5f0f0;
-  border-color: #e8d0d0;
+  background: #fff0f0;
+  border-color: #e04040;
 }
 
 .loading-slots {
