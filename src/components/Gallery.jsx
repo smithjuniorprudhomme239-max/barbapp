@@ -8,6 +8,8 @@ const photos = [
   { src: 'https://i.postimg.cc/cL7Pmdpm/fccff0abbc93e.png', alt: 'Barbershop atmosphere' },
   { src: 'https://i.postimg.cc/W1DwN8nv/569ea474542e8.png', alt: 'Hot towel shave' },
   { src: 'https://i.postimg.cc/W3cB6h3y/8d096ebb6ebf38.png', alt: 'Stylish haircut' },
+  { src: 'https://i.postimg.cc/RV6mT4Tp/image1.png', alt: 'Barber masterpiece' },
+  { src: 'https://i.postimg.cc/zBrMT1fY/image-2.png', alt: 'Barber masterpiece 2' },
 ]
 
 export default function Gallery() {
