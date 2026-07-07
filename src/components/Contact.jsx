@@ -111,9 +111,11 @@ export default function Contact() {
 
         if (data) {
           const booked = data.map(b => {
-            const d = new Date(b.date + (b.date.includes('T') ? '' : 'T00:00:00'))
-            const hours = d.getHours()
-            const minutes = d.getMinutes()
+            // Parse time directly from the ISO string to avoid browser timezone differences
+            const timePart = b.date.split('T')[1] || ''
+            const [hStr, mStr] = timePart.split(':')
+            const hours = parseInt(hStr, 10)
+            const minutes = parseInt(mStr, 10)
             const period = hours >= 12 ? 'PM' : 'AM'
             const displayHour = hours % 12 === 0 ? 12 : hours % 12
             return `${displayHour}:${String(minutes).padStart(2, '0')} ${period}`
