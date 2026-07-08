@@ -43,6 +43,11 @@
           isNative = true;
         }
 
+        // 6. Mobile screen width fallback (always show mobile layout on small screens)
+        if (window.innerWidth <= 768) {
+          isNative = true;
+        }
+
         // Apply the class and store the detection result
         if (isNative) {
           document.body.classList.add('is-native-app');
