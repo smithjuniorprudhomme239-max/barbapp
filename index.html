@@ -13,6 +13,48 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>DuckensBarber - Premium Barbershop</title>
     <link rel="preload" href="https://i.postimg.cc/cHB0ht4b/Gemini-Generated-Image-8fy4xn8fy4xn8fy4.png" as="image" fetchpriority="high" />
+    <script>
+      (function detectNativeApp() {
+        var isNative = false;
+
+        // 1. Check for Median webview via user agent
+        var ua = navigator.userAgent || '';
+        if (/Median/i.test(ua)) {
+          isNative = true;
+        }
+
+        // 2. Check for Median injected bridge object
+        if (typeof window.Median !== 'undefined' || typeof window.MedianApp !== 'undefined') {
+          isNative = true;
+        }
+
+        // 3. URL parameter override (for testing in browser)
+        if (window.location.search.indexOf('native=true') !== -1) {
+          isNative = true;
+        }
+
+        // 4. Check for Android WebView (generic)
+        if (/wv/.test(ua) && /Android/i.test(ua)) {
+          isNative = true;
+        }
+
+        // 5. PWA standalone mode (installed as app)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+          isNative = true;
+        }
+
+        // Apply the class and store the detection result
+        if (isNative) {
+          document.body.classList.add('is-native-app');
+          document.body.classList.add('is-browser');
+        } else {
+          document.body.classList.add('is-browser');
+        }
+
+        // Expose for debugging
+        window.__IS_NATIVE_APP__ = isNative;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
