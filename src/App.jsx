@@ -12,7 +12,12 @@ import Admin from './components/Admin'
 import UserAuth from './components/UserAuth'
 import MarketPage from './components/MarketPage'
 import GalleryPage from './components/GalleryPage'
+import MobileShell from './components/MobileShell'
 import './App.css'
+
+function isNativeApp() {
+  return document.body.classList.contains('is-native-app')
+}
 
 function AppContent() {
   const [page, setPage] = useState('home')
@@ -20,6 +25,10 @@ function AppContent() {
 
   if (loading) {
     return <div className="loading">Loading...</div>
+  }
+
+  if (isNativeApp()) {
+    return <MobileShell />
   }
 
   if (page === 'adminLogin') return <Login onSuccess={() => setPage('admin')} onClose={() => setPage('home')} />

@@ -26,7 +26,7 @@ const photos = [
   { src: 'https://i.postimg.cc/ncq1QSW9/im7.png', alt: 'Barber masterpiece 15' },
 ]
 
-export default function GalleryPage({ onBack }) {
+export default function GalleryPage({ onBack, isMobile }) {
   const [selectedIndex, setSelectedIndex] = useState(null)
 
   const openLightbox = (index) => {
@@ -50,9 +50,11 @@ export default function GalleryPage({ onBack }) {
   }
 
   return (
-    <div className="gallery-page">
+    <div className={`gallery-page ${isMobile ? 'gallery-page-mobile' : ''}`}>
       <div className="gallery-page-header">
-        <button className="gallery-back-btn" onClick={onBack}>← Back</button>
+        {!isMobile && (
+          <button className="gallery-back-btn" onClick={onBack}>← Back</button>
+        )}
         <div>
           <span className="gallery-label">OUR WORK</span>
           <h1>Full Gallery</h1>
